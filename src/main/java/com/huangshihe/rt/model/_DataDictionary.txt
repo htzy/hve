@@ -1,0 +1,18 @@
+Table: user
+-------------+--------------+------+-----+---------+---------
+ Field       | Type         | Null | Key | Default | Remarks 
+-------------+--------------+------+-----+---------+---------
+ id          | INT(10)      | NO   | PRI |         |         
+ username    | VARCHAR(30)  | NO   |     |         |         
+ password    | VARCHAR(32)  | NO   |     |         |         
+ sex         | BIT          | NO   |     |         |         
+ birthday    | DATE(10)     | YES  |     |         |         
+ email       | VARCHAR(30)  | NO   |     |         |         
+ phone       | VARCHAR(12)  | NO   |     |         |         
+ address     | VARCHAR(50)  | NO   |     |         |         
+ photo       | VARCHAR(100) | YES  |     |         |         
+ create_time | DATETIME(19) | NO   |     |         |         
+ login_time  | DATETIME(19) | YES  |     |         |         
+ status      | INT(10)      | NO   |     |         |         
+-------------+--------------+------+-----+---------+---------
+

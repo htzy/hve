@@ -1,0 +1,7 @@
+jdbcUrl = jdbc:mysql://127.0.0.1/huangshihe_rt?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull
+user = root
+password = root
+devMode = true
+ACCESS_KEY = DG4wg82krO0uJkEKDz3AIqPKKlTAcQDbyoM43_qN
+SECRET_KEY = zJdB1dObu3vadQix6CMRL9fyWn35Z2JVaJXm9lkI
+QINIU_BUCKNAME = forxyz
