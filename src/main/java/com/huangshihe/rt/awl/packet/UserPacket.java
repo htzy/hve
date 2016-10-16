@@ -41,31 +41,20 @@ public class UserPacket {
     private String identityInfo;
 
     public UserPacket(GameUser gameUser) {
-        if (gameUser == null){
-            // TODO
-            return emptyUserPacket();
+        if (gameUser != null){
+            User user = User.getUser(gameUser.getUserId());
+            setUsername(user.getUsername());
+            setSex(user.getSex());
+            setPhoto(user.getPhoto());
+            // 只有当玩家处于游戏状态时（活着），才具备玩家身份信息。
+            if (gameUser.getStatus() == GameUser.LIVE) {
+                setIdentityNum(gameUser.getNum());
+                setIdentityType(gameUser.getIdentity().getType());
+                setIdentityName(gameUser.getIdentity().getName());
+                setIdentityDescription(gameUser.getIdentity().getDescription());
+                setIdentityInfo(gameUser.getInfo());
+            }
         }
-
-        User user = User.getUser(gameUser.getUserId());
-        setUsername(user.getUsername());
-        setSex(user.getSex());
-        setPhoto(user.getPhoto());
-        // 只有当玩家处于游戏状态时（活着），才具备玩家身份信息。
-        if (gameUser.getStatus() == GameUser.LIVE) {
-            setIdentityNum(gameUser.getNum());
-            setIdentityType(gameUser.getIdentity().getType());
-            setIdentityName(gameUser.getIdentity().getName());
-            setIdentityDescription(gameUser.getIdentity().getDescription());
-            setIdentityInfo(gameUser.getInfo());
-        }
-    }
-
-    public UserPacket(){
-
-    }
-
-    public static UserPacket emptyUserPacket(){
-        return new UserPacket();
     }
 
     public String getUsername() {

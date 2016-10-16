@@ -70,8 +70,8 @@ public class AwlUser implements GameUser{
         return info;
     }
 
-    /**
-     * 空用户
-     */
-    public static final int EMPTY_AWL_USER = -1;
+//    /**
+//     * 空用户
+//     */
+//    public static final int EMPTY_AWL_USER = -1;
 }

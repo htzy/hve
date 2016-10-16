@@ -55,9 +55,14 @@ public class AwlCoreSocket {
         this.session = session;
         this.creatorId = creatorId;
         Awl awl = AwlCache.getInstance().get(creatorId);
+        // 当玩家掉线后重新进入时，重新设置游戏状态为等待
+        if (awl != null && awl.getStatus() == Awl.STATUS_DELETE_GAMER) {
+            awl.setStatus(Awl.STATUS_WAIT);
+        }
+
         // 游戏存在且处于等待状态
         // TODO 暂不考虑断线
-        if (awl == null || !(awl.getStatus() == Awl.STATUS_WAIT || awl.getStatus() == Awl.STATUS_DELETE_GAMER)) {
+        if (awl == null || !(awl.getStatus() == Awl.STATUS_WAIT)) {
             throw new IllegalArgumentException("illegal game of awl, wrong creatorId or status");
         }
         //查询用户信息
@@ -89,8 +94,7 @@ public class AwlCoreSocket {
 
         if (awl == null || creatorId == awlUserId) {
             // TODO ??? “结束这一局”错误！空指针
-            basePacket = new BasePacket(awlUserId, new AwlUser(AwlUser.EMPTY_AWL_USER), Awl.STATUS_ED);
-            System.out.println("quit core socket connection basePacket = " + basePacket);
+            basePacket = new BasePacket(awlUserId, null, Awl.STATUS_ED);
         } else {
             basePacket = new BasePacket(awlUserId, awl.getGamer(awlUserId), Awl.STATUS_DELETE_GAMER);
             awl.remove(awl.getGamer(awlUserId));

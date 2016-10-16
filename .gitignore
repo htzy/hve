@@ -4,3 +4,6 @@
 /src/sql/huangshihe_rt.sql
 /game-awl/target/
 /jfinal-lambda/target/
+*.iml
+/classes/
+*.class

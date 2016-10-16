@@ -78,14 +78,14 @@ public class BasePacket {
                 .collect(Collectors.toList()));
     }
 
-    public BasePacket(int awlUserId, GameUser gameUser, int status){
+    public BasePacket(int awlUserId, GameUser gameUser, int status) {
         setAwlUserId(awlUserId);
         setStatus(status);
         getUserPackets().add(new UserPacket(gameUser));
     }
 
     public List<UserPacket> getUserPackets() {
-        if(userPackets == null){
+        if (userPackets == null) {
             userPackets = new ArrayList<UserPacket>();
         }
         return userPackets;

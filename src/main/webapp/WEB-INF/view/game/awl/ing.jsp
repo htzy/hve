@@ -66,16 +66,6 @@
                 <c:if test="${awl.status == 0 || awl.status == -1}">
                     游戏等待中，快去呼唤你的小伙伴来加入你创建的游戏吧...<br>
                     等待中的玩家们：
-                    <c:forEach items="${userList}" var="user">
-                        <li id="awlUser_${user.username}">${user.username}
-                            <img src="${basePath}/lib/photos/user_placeholder.png"
-                                 class="img-circle img-responsive col-md-2">
-                            <c:choose>
-                                <c:when test="${user.sex}">男</c:when>
-                                <c:otherwise>女</c:otherwise>
-                            </c:choose>
-                        </li>
-                    </c:forEach>
                 </c:if>
                 <div class="row">特殊信息：</div>
             </div>
@@ -232,7 +222,6 @@
      */
     function deleteAwlUser(userPackets) {
         var $awlUserList = $("#awlUserList");
-        console.info($awlUserList);
         var $awlUser = containAwlUser($awlUserList.children("li"), userPackets[0].username);
         if($awlUser != null){
             $awlUser.remove();
