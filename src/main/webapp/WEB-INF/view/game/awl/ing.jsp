@@ -49,17 +49,27 @@
 </div>
 <div class="section">
     <div class="container">
+        <c:if test="${loginUser.id == awl.creatorId}">
+            <a class="btn btn-danger" href="javascript:void(0);" onclick="quitGame()">结束这一局</a>
+        </c:if>
+        <c:if test="${loginUser.id != awl.creatorId}">
+            <a class="btn btn-danger" href="javascript:void(0);" onclick="quitGame()">退出这一局</a>
+        </c:if>
+    </div>
+
+    <div class="container">
         <div class="row">
             <%--玩家列表/角色列表--%>
             <div id="awlUserList" class="col-md-4">
                 <%--游戏等待中--%>
 
-                <c:if test="${awl.status == 0}">
+                <c:if test="${awl.status == 0 || awl.status == -1}">
                     游戏等待中，快去呼唤你的小伙伴来加入你创建的游戏吧...<br>
                     等待中的玩家们：
                     <c:forEach items="${userList}" var="user">
                         <li id="awlUser_${user.username}">${user.username}
-                            <img src="${basePath}/lib/photos/user_placeholder.png" class="img-circle img-responsive col-md-2">
+                            <img src="${basePath}/lib/photos/user_placeholder.png"
+                                 class="img-circle img-responsive col-md-2">
                             <c:choose>
                                 <c:when test="${user.sex}">男</c:when>
                                 <c:otherwise>女</c:otherwise>
@@ -82,7 +92,7 @@
             <div class="col-md-6">选择组员或投票</div>
             <div class="col-md-6">
                 <input name="message" id="messageId"/>
-                <button id="sendButton" onClick="sendMsg()" >提交</button>
+                <button id="sendButton" onClick="sendMsg()">提交</button>
                 <input>
                 <input type="button" value="私密">
             </div>
@@ -98,36 +108,36 @@
         // TODO 当前浏览器不支持时，应该从玩家列表（等待、游戏中）中去掉当前用户，可视为意外退出游戏。
         alert("对不起，当前浏览器不支持该游戏！建议使用firefox、chrome等浏览器。");
         window.location.href = "${basePath}/game";
-    }else{
+    } else {
         init();
     }
     var chatWs;
     var coreWs;
     function init() {
         // 聊天socket
-        chatWs=new WebSocket("ws://"+document.location.host+"${basePath}/ws/awl/chat/${loginUser.id}");
+        chatWs = new WebSocket("ws://" + document.location.host + "${basePath}/ws/awl/chat/${loginUser.id}");
         //监听消息
-        chatWs.onmessage = function(event) {
+        chatWs.onmessage = function (event) {
             log(event.data);
         };
         // 关闭WebSocket
-        chatWs.onclose = function(event) {
+        chatWs.onclose = function (event) {
 
             //WebSocket Status:: Socket Closed
         };
         // 打开WebSocket
-        chatWs.onopen = function(event) {
+        chatWs.onopen = function (event) {
             //WebSocket Status:: Socket Open
             // 发送一个初始化消息
 //            chatWs.send("Hello, Server!");
         };
-        chatWs.onerror =function(event){
+        chatWs.onerror = function (event) {
             //WebSocket Status:: Error was reported
         };
 
         /////////////////////////////////////////////////////////////
         // 核心socket
-        coreWs = new WebSocket("ws://"+document.location.host+"${basePath}/ws/awl/core/${awl.creatorId}/${loginUser.id}");
+        coreWs = new WebSocket("ws://" + document.location.host + "${basePath}/ws/awl/core/${awl.creatorId}/${loginUser.id}");
 
         coreWs.onopen = function (event) {
 //            log("open:"+event.data);
@@ -138,16 +148,17 @@
             // 如果游戏状态为等待中，则检查玩家信息是否正确；当游戏状态为进行中，则检查当前界面是否处于进行中
             // 将string数据转为json。
             var $message = $.parseJSON(event.data);
-            if($message.status == 0){
+            if ($message.status == 0) {
                 // 重新生成等待中的玩家列表，并提示用户。
                 renderAwlUserList($message.userPackets);
-            }else if($message.status == 1){
+            } else if ($message.status == 1) {
                 // TODO 进入正式游戏界面，并提示用户。
                 console.info("进入正式游戏，修改界面！");
-            }else if($message.status == 2){
-                // TODO 游戏结束，提示用户
+            } else if ($message.status == 2) {
                 console.info("游戏结束！");
-            }else if($message.status == -1){
+                alert("欢迎再来...see you~");
+                quitGame();
+            } else if ($message.status == -1) {
                 // 删除已退出玩家
                 deleteAwlUser($message.userPackets);
             }
@@ -156,23 +167,15 @@
         coreWs.onclose = function (event) {
 //            console.info(event.data);
         };
-
-//        window.onbeforeunload=function(){
-//            return "游戏还在进行中，确定继续该操作？";
-//        };
-//        window.onunload = function(){
-//            coreWs.close();
-//        }
-
     }
-    var log = function(s) {
+    var log = function (s) {
         if (document.readyState !== "complete") {
             log.buffer.push(s);
         } else {
             document.getElementById("contentId").innerHTML += (s + "\n");
         }
     };
-    function sendMsg(){
+    function sendMsg() {
         var $message = $("#messageId");
         chatWs.send($message.val());
         $message.val("");
@@ -183,23 +186,23 @@
         // 记录需要添加的下标
         var readyToAdd = "";
 
-        $.each(userPackets, function(i){
+        $.each(userPackets, function (i) {
             // 如果当前li标签中不存在该玩家，则准备新增该玩家
-            if(containAwlUser($awlUserList.children("li"), userPackets[i].username) == null){
-                readyToAdd += i+",";
+            if (containAwlUser($awlUserList.children("li"), userPackets[i].username) == null) {
+                readyToAdd += i + ",";
             }
         });
         ////////////////////////////修改界面////////////////////////
         var readyToAddList = readyToAdd.split(",");
-        for(var i = 0; i < readyToAddList.length; i++){
+        for (var i = 0; i < readyToAddList.length; i++) {
             // 忽略“空字符串”
-            if(isNum(readyToAddList[i])){
+            if (isNum(readyToAddList[i])) {
                 var userPacket = userPackets[readyToAddList[i]];
-                if(userPacket.sex){
-                    $awlUserList.append("<li id='awlUser_"+userPacket.username+"'>"+userPacket.username+"<img src='"+userPacket.photo+"' " +
+                if (userPacket.sex) {
+                    $awlUserList.append("<li id='awlUser_" + userPacket.username + "'>" + userPacket.username + "<img src='" + userPacket.photo + "' " +
                             "class='img-circle img-responsive col-md-2'>男</li>");
-                }else{
-                    $awlUserList.append("<li id='awlUser_"+userPacket.username+"'>"+userPacket.username+"<img src='"+userPacket.photo+"' " +
+                } else {
+                    $awlUserList.append("<li id='awlUser_" + userPacket.username + "'>" + userPacket.username + "<img src='" + userPacket.photo + "' " +
                             "class='img-circle img-responsive col-md-2'>女</li>");
                 }
             }
@@ -215,7 +218,7 @@
         // 是否找到玩家的标记
         var awlUser = null;
         $.each(awlUserLi, function (i) {
-            if(awlUserLi[i].id == "awlUser_"+username){
+            if (awlUserLi[i].id == "awlUser_" + username) {
                 awlUser = awlUserLi[i];
                 return;
             }
@@ -227,16 +230,28 @@
      * 删除该玩家
      * @param userPackets
      */
-    function deleteAwlUser(userPackets){
+    function deleteAwlUser(userPackets) {
         var $awlUserList = $("#awlUserList");
-        containAwlUser($awlUserList.children("li"), userPackets[0].username).remove();
+        console.info($awlUserList);
+        var $awlUser = containAwlUser($awlUserList.children("li"), userPackets[0].username);
+        if($awlUser != null){
+            $awlUser.remove();
+        }
     }
 
-    window.onbeforeunload=function(){
+    window.onbeforeunload = function () {
         return "游戏还在进行中，确定继续该操作？";
     };
-    window.onunload = function(){
+    window.onunload = function () {
+        // run correct on firefox, but chrome can't execute this code?
         coreWs.close();
+        chatWs.close();
+    };
+
+    function quitGame() {
+        chatWs.close();
+        coreWs.close();
+        window.location.href = "${basePath}/game_awl/quit";
     }
 
 </script>

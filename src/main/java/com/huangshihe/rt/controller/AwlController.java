@@ -1,10 +1,10 @@
 package com.huangshihe.rt.controller;
 
 import com.huangshihe.game.awl.core.Awl;
-import com.huangshihe.game.awl.core.AwlUser;
 import com.huangshihe.game.awl.manage.AwlCache;
 import com.huangshihe.rt.interceptor.UserLoginInterceptor;
 import com.huangshihe.rt.model.User;
+import com.huangshihe.rt.socket.AwlCoreSocket;
 import com.jfinal.aop.Before;
 import com.jfinal.core.Controller;
 
@@ -21,10 +21,6 @@ public class AwlController extends Controller {
     public void index() {
         // 查询所有的游戏
         setAttr("awlList", AwlCache.getInstance().getAll());
-        List<Awl> list = AwlCache.getInstance().getAll();
-        if (list != null && list.size() > 0) {
-            System.out.println("index:" + AwlCache.getInstance().getAll().get(0).getGamers().size());
-        }
         render("index.jsp");
     }
 
@@ -52,5 +48,18 @@ public class AwlController extends Controller {
             setAttr("info", "创建游戏失败！");
             forwardAction("/game_awl/");
         }
+    }
+
+    public void quit() {
+        Awl awl = getSessionAttr("awl");
+        User user = getSessionAttr("loginUser");
+        if (awl.getCreatorId() == user.getId()) {
+            // 如果是创建者退出，则结束该游戏
+            AwlCache.getInstance().remove(awl.getId());
+        } else {
+            // 如果是参与者退出，则去除该玩家
+            awl.remove(awl.getGamer(user.getId()));
+        }
+        redirect("/game_awl/");
     }
 }

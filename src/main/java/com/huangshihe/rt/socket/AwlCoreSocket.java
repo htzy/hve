@@ -42,6 +42,7 @@ public class AwlCoreSocket {
 
     /**
      * 打开连接
+     *
      * @param session
      * @param creatorId
      * @param awlUserId
@@ -56,12 +57,12 @@ public class AwlCoreSocket {
         Awl awl = AwlCache.getInstance().get(creatorId);
         // 游戏存在且处于等待状态
         // TODO 暂不考虑断线
-        if(awl == null || !(awl.getStatus() == Awl.STATUS_WAIT || awl.getStatus() == Awl.STATUS_DELETE_GAMER)){
+        if (awl == null || !(awl.getStatus() == Awl.STATUS_WAIT || awl.getStatus() == Awl.STATUS_DELETE_GAMER)) {
             throw new IllegalArgumentException("illegal game of awl, wrong creatorId or status");
         }
         //查询用户信息
         user = User.dao.findById(awlUserId);
-        if(user == null){
+        if (user == null) {
             throw new IllegalArgumentException("illegal user visit...");
         }
         // 该玩家加入到游戏中
@@ -74,27 +75,6 @@ public class AwlCoreSocket {
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
-//
-//        // 当人数达到要求时，分配角色并提示客户端游戏开始。
-//        if(awl.getGamers().size() == awl.getRequireGamerNum()){
-//            if(awl.play()){
-//                // 队伍创建者从num-0开始，根据玩家num获得玩家id
-//                int teamCreatorId = awl.getGameUserFromNum(0).getUserId();
-//                basePacket = new BasePacket(creatorId, awl);
-////                FullPacket fullPacket = new FullPacket(new BasePacket(awlUserId, awl), new TeamPacket(teamCreatorId, null));
-//                // 发送基本信息包和组队信息包
-//                try {
-//                    AwlCoreSocket.broadCast(objectMapper.writeValueAsString(basePacket));
-////                    System.out.println("objectMapper.writeValueAsString(fullPacket) = " + objectMapper.writeValueAsString(fullPacket));
-////                    AwlCoreSocket.broadCast(objectMapper.writeValueAsString(fullPacket));
-//                } catch (JsonProcessingException e) {
-//                    e.printStackTrace();
-//                }
-////                AwlCoreSocket.broadCast("系统提示 > 游戏正式开始！别xia bb了...");
-//            }else{
-//                AwlCoreSocket.broadCast("系统提示 > 分配角色失败！请联系开发者。");
-//            }
-//        }
     }
 
     /**
@@ -103,17 +83,24 @@ public class AwlCoreSocket {
     @OnClose
     public void onClose(@PathParam(value = "awlUserId") int awlUserId) {
         connections.remove(this);
-        // TODO 当有玩家掉线时，如何处理？
         // 当有玩家掉线，更新当前游戏玩家信息（去除该掉线玩家），并通知客户端
         Awl awl = AwlCache.getInstance().get(creatorId);
-        BasePacket basePacket = new BasePacket(awlUserId, awl.getGamer(awlUserId), Awl.STATUS_DELETE_GAMER);
+        BasePacket basePacket;
+
+        if (awl == null || creatorId == awlUserId) {
+            // TODO ??? “结束这一局”错误！空指针
+            basePacket = new BasePacket(awlUserId, new AwlUser(AwlUser.EMPTY_AWL_USER), Awl.STATUS_ED);
+            System.out.println("quit core socket connection basePacket = " + basePacket);
+        } else {
+            basePacket = new BasePacket(awlUserId, awl.getGamer(awlUserId), Awl.STATUS_DELETE_GAMER);
+            awl.remove(awl.getGamer(awlUserId));
+            System.out.println("close core socket connection awl.getGamers().size() = " + awl.getGamers().size());
+        }
         try {
             AwlCoreSocket.broadCast(objectMapper.writeValueAsString(basePacket));
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
-        awl.remove(awl.getGamer(awlUserId));
-        System.out.println("close core socket connection awl.getGamers().size() = " + awl.getGamers().size());
     }
 
     /**
@@ -136,7 +123,7 @@ public class AwlCoreSocket {
      */
     @OnError
     public void onError(Throwable throwable) {
-        System.err.println("awl core socket error:"+throwable.getLocalizedMessage());
+        System.err.println("awl core socket error:" + throwable.getLocalizedMessage());
         throwable.printStackTrace();
     }
 
@@ -155,10 +142,8 @@ public class AwlCoreSocket {
                 connections.remove(socket);
                 try {
                     socket.session.close();
-                } catch (IOException e1) {
+                } catch (IOException ignored) {
                 }
-//                AwlCoreSocket.broadCast(String.format("System> %s %s", socket.nickName,
-//                        " has bean disconnection."));
             }
         }
     }

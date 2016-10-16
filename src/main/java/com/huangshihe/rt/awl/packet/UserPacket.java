@@ -41,6 +41,11 @@ public class UserPacket {
     private String identityInfo;
 
     public UserPacket(GameUser gameUser) {
+        if (gameUser == null){
+            // TODO
+            return emptyUserPacket();
+        }
+
         User user = User.getUser(gameUser.getUserId());
         setUsername(user.getUsername());
         setSex(user.getSex());
@@ -53,6 +58,14 @@ public class UserPacket {
             setIdentityDescription(gameUser.getIdentity().getDescription());
             setIdentityInfo(gameUser.getInfo());
         }
+    }
+
+    public UserPacket(){
+
+    }
+
+    public static UserPacket emptyUserPacket(){
+        return new UserPacket();
     }
 
     public String getUsername() {

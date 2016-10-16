@@ -87,17 +87,19 @@
                 <c:choose>
                     <c:when test="${awl.status == 0 || awl.status == -1}">
                         <div class="col-md-4">
-                            <%--TODO 增加头像 --%>
-                            <%--<img src="http://pingendo.github.io/pingendo-bootstrap/assets/user_placeholder.png"--%>
-                                 <%--class="center-block img-circle img-responsive">--%>
-                            <img src="${basePath}/lib/photos/user_placeholder.png" class="center-block img-circle img-responsive">
+                                <%--TODO 增加头像 --%>
+                                <%--<img src="http://pingendo.github.io/pingendo-bootstrap/assets/user_placeholder.png"--%>
+                                <%--class="center-block img-circle img-responsive">--%>
+                            <img src="${basePath}/lib/photos/user_placeholder.png"
+                                 class="center-block img-circle img-responsive">
                             <h3 class="text-center">创建人：${awl.creatorName}</h3>
                             <div class="row">
                                 <div class="col-md-12">
                                     <i class="fa fa-3x fa-bed fa-fw"></i>
                                     <span>${awl.createTime}</span>
                                     <div class="col-md-3 pull-right">
-                                        <a class="btn btn-primary" href="${basePath}/game_awl/ing/${awl.id}">加入<span class="badge">${fn:length(awl.gamers)}</span></a>
+                                        <a class="btn btn-primary" href="${basePath}/game_awl/ing/${awl.id}">加入<span
+                                                class="badge">${fn:length(awl.gamers)}</span></a>
                                     </div>
                                 </div>
                             </div>
@@ -105,7 +107,8 @@
                     </c:when>
                     <c:when test="${awl.status == 1}">
                         <div class="col-md-4">
-                            <img src="${basePath}/lib/photos/user_placeholder.png" class="center-block img-circle img-responsive">
+                            <img src="${basePath}/lib/photos/user_placeholder.png"
+                                 class="center-block img-circle img-responsive">
                             <h3 class="text-center">创建人：${awl.creatorName}</h3>
                             <div class="row">
                                 <div class="col-md-12">
@@ -170,51 +173,7 @@
 </body>
 <script type="text/javascript">
     var info = "${info}";
-    if(info != ""){
+    if (info != "") {
         alert(info);
     }
 </script>
-
-<%--<script type="text/JavaScript">--%>
-    <%--//验证浏览器是否支持WebSocket协议--%>
-    <%--if (!window.WebSocket) {--%>
-        <%--alert("对不起，当前浏览器不支持该游戏！建议使用firefox、chrome等浏览器。");--%>
-    <%--}--%>
-    <%--var ws;--%>
-    <%--function display() {--%>
-        <%--//var valueLabel = document.getElementById("valueLabel");--%>
-        <%--//valueLabel.innerHTML = "";--%>
-        <%--ws=new WebSocket("ws://${basePath}/ws/chat/xyz");--%>
-        <%--//监听消息--%>
-        <%--ws.onmessage = function(event) {--%>
-            <%--//valueLabel.innerHTML+ = event.data;--%>
-            <%--log(event.data);--%>
-        <%--};--%>
-        <%--// 打开WebSocket--%>
-        <%--ws.onclose = function(event) {--%>
-
-            <%--//WebSocket Status:: Socket Closed--%>
-        <%--};--%>
-        <%--// 打开WebSocket--%>
-        <%--ws.onopen = function(event) {--%>
-            <%--//WebSocket Status:: Socket Open--%>
-            <%--//// 发送一个初始化消息--%>
-            <%--ws.send("Hello, Server!");--%>
-        <%--};--%>
-        <%--ws.onerror =function(event){--%>
-            <%--//WebSocket Status:: Error was reported--%>
-        <%--};--%>
-    <%--}--%>
-    <%--var log = function(s) {--%>
-        <%--if (document.readyState !== "complete") {--%>
-            <%--log.buffer.push(s);--%>
-        <%--} else {--%>
-            <%--document.getElementById("contentId").innerHTML += (s + "\n");--%>
-        <%--}--%>
-    <%--};--%>
-    <%--function sendMsg(){--%>
-        <%--var msg=document.getElementById("messageId");--%>
-        <%--//alert(msg.value);--%>
-        <%--ws.send(msg.value);--%>
-    <%--}--%>
-<%--</script>--%>
