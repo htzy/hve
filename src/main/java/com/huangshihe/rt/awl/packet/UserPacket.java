@@ -2,6 +2,7 @@ package com.huangshihe.rt.awl.packet;
 
 import com.huangshihe.game.core.GameUser;
 import com.huangshihe.rt.model.User;
+import com.huangshihe.rt.util.GlobalUtils;
 
 /**
  * Created by Administrator on 2016/8/15.
@@ -41,11 +42,16 @@ public class UserPacket {
     private String identityInfo;
 
     public UserPacket(GameUser gameUser) {
-        if (gameUser != null){
+        if (gameUser != null) {
             User user = User.getUser(gameUser.getUserId());
             setUsername(user.getUsername());
             setSex(user.getSex());
-            setPhoto(user.getPhoto());
+            // 当用户没有头像时，使用默认头像
+            if (user.getPhoto() == null || "".equals(user.getPhoto().trim())) {
+                setPhoto(GlobalUtils.RESOURCE_LOCATION + "user_placeholder.png");
+            } else {
+                setPhoto(user.getPhoto());
+            }
             // 只有当玩家处于游戏状态时（活着），才具备玩家身份信息。
             if (gameUser.getStatus() == GameUser.LIVE) {
                 setIdentityNum(gameUser.getNum());

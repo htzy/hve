@@ -57,22 +57,23 @@
         </c:if>
     </div>
 
-    <div class="container">
-        <div class="row">
-            <%--玩家列表/角色列表--%>
-            <div id="awlUserList" class="col-md-4">
+    <div class="container dl-horizontal">
+        <%--玩家列表/角色列表--%>
+        <div class="col-sm-4">
+            <div id="introduceInfo">
                 <%--游戏等待中--%>
-
                 <c:if test="${awl.status == 0 || awl.status == -1}">
                     游戏等待中，快去呼唤你的小伙伴来加入你创建的游戏吧...<br>
                     等待中的玩家们：
                 </c:if>
-                <div class="row">特殊信息：</div>
             </div>
-            <div class="col-md-8">
-                <textarea rows="20" cols="30" id="contentId"></textarea>
-                <%--TODO 游戏进程信息（红色）及聊天信息（黑色），坏人间的私密信息（蓝色）--%>
-            </div>
+            <ul id="awlUserList" class="list-group">
+            </ul>
+            <div id="awlUserInfo" class="row">特殊信息：</div>
+        </div>
+        <div class="col-sm-8">
+            <textarea rows="20" cols="30" id="contentId"></textarea>
+            <%--TODO 游戏进程信息（红色）及聊天信息（黑色），坏人间的私密信息（蓝色）--%>
         </div>
     </div>
 </div>
@@ -138,12 +139,15 @@
             // 如果游戏状态为等待中，则检查玩家信息是否正确；当游戏状态为进行中，则检查当前界面是否处于进行中
             // 将string数据转为json。
             var $message = $.parseJSON(event.data);
+            var $introduceInfo = $("#introduceInfo");
             if ($message.status == 0) {
                 // 重新生成等待中的玩家列表，并提示用户。
                 renderAwlUserList($message.userPackets);
+                $introduceInfo.innerHTML = "游戏等待中，快去呼唤你的小伙伴来加入你创建的游戏吧...<br>等待中的玩家们：";
             } else if ($message.status == 1) {
-                // TODO 进入正式游戏界面，并提示用户。
+                // TODO now 进入正式游戏界面，并提示用户。
                 console.info("进入正式游戏，修改界面！");
+                $introduceInfo.innerHTML = "游戏进行中，享受游戏吧...<br>玩家们：";
             } else if ($message.status == 2) {
                 console.info("游戏结束！");
                 alert("欢迎再来...see you~");
@@ -151,6 +155,7 @@
             } else if ($message.status == -1) {
                 // 删除已退出玩家
                 deleteAwlUser($message.userPackets);
+                $introduceInfo.innerHTML = "有人退出了！游戏进入等待中，快去呼唤你的小伙伴来加入你创建的游戏吧...<br>等待中的玩家们：";
             }
         };
 
@@ -189,10 +194,10 @@
             if (isNum(readyToAddList[i])) {
                 var userPacket = userPackets[readyToAddList[i]];
                 if (userPacket.sex) {
-                    $awlUserList.append("<li id='awlUser_" + userPacket.username + "'>" + userPacket.username + "<img src='" + userPacket.photo + "' " +
+                    $awlUserList.append("<li class='list-group-item' id='awlUser_" + userPacket.username + "'>" + userPacket.username + "<img src='" + userPacket.photo + "' " +
                             "class='img-circle img-responsive col-md-2'>男</li>");
                 } else {
-                    $awlUserList.append("<li id='awlUser_" + userPacket.username + "'>" + userPacket.username + "<img src='" + userPacket.photo + "' " +
+                    $awlUserList.append("<li class='list-group-item' id='awlUser_" + userPacket.username + "'>" + userPacket.username + "<img src='" + userPacket.photo + "' " +
                             "class='img-circle img-responsive col-md-2'>女</li>");
                 }
             }
@@ -223,7 +228,7 @@
     function deleteAwlUser(userPackets) {
         var $awlUserList = $("#awlUserList");
         var $awlUser = containAwlUser($awlUserList.children("li"), userPackets[0].username);
-        if($awlUser != null){
+        if ($awlUser != null) {
             $awlUser.remove();
         }
     }

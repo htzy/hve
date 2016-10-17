@@ -44,4 +44,9 @@ public class GlobalUtils {
      */
     public static final String UPLOAD_ORGFILE = "/res/photo";
 
+    /**
+     * resource location
+     */
+    public static final String RESOURCE_LOCATION = "http://oeerwig1e.bkt.clouddn.com/";
+
 }

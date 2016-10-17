@@ -59,10 +59,8 @@ public class AwlCoreSocket {
         if (awl != null && awl.getStatus() == Awl.STATUS_DELETE_GAMER) {
             awl.setStatus(Awl.STATUS_WAIT);
         }
-
         // 游戏存在且处于等待状态
-        // TODO 暂不考虑断线
-        if (awl == null || !(awl.getStatus() == Awl.STATUS_WAIT)) {
+        if (awl == null || awl.getStatus() != Awl.STATUS_WAIT) {
             throw new IllegalArgumentException("illegal game of awl, wrong creatorId or status");
         }
         //查询用户信息
@@ -91,14 +89,12 @@ public class AwlCoreSocket {
         // 当有玩家掉线，更新当前游戏玩家信息（去除该掉线玩家），并通知客户端
         Awl awl = AwlCache.getInstance().get(creatorId);
         BasePacket basePacket;
-
+        // 当创建者退出时，结束该游戏；当参与者退出时，从玩家列表中删除该玩家
         if (awl == null || creatorId == awlUserId) {
-            // TODO ??? “结束这一局”错误！空指针
             basePacket = new BasePacket(awlUserId, null, Awl.STATUS_ED);
         } else {
             basePacket = new BasePacket(awlUserId, awl.getGamer(awlUserId), Awl.STATUS_DELETE_GAMER);
             awl.remove(awl.getGamer(awlUserId));
-            System.out.println("close core socket connection awl.getGamers().size() = " + awl.getGamers().size());
         }
         try {
             AwlCoreSocket.broadCast(objectMapper.writeValueAsString(basePacket));

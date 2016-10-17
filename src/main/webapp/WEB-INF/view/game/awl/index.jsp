@@ -90,7 +90,7 @@
                                 <%--TODO 增加头像 --%>
                                 <%--<img src="http://pingendo.github.io/pingendo-bootstrap/assets/user_placeholder.png"--%>
                                 <%--class="center-block img-circle img-responsive">--%>
-                            <img src="${basePath}/lib/photos/user_placeholder.png"
+                            <img src="http://oeerwig1e.bkt.clouddn.com/user_placeholder.png"
                                  class="center-block img-circle img-responsive">
                             <h3 class="text-center">创建人：${awl.creatorName}</h3>
                             <div class="row">
@@ -107,7 +107,7 @@
                     </c:when>
                     <c:when test="${awl.status == 1}">
                         <div class="col-md-4">
-                            <img src="${basePath}/lib/photos/user_placeholder.png"
+                            <img src="http://oeerwig1e.bkt.clouddn.com/user_placeholder.png"
                                  class="center-block img-circle img-responsive">
                             <h3 class="text-center">创建人：${awl.creatorName}</h3>
                             <div class="row">
@@ -127,7 +127,7 @@
                 </c:choose>
             </c:forEach>
             <div class="col-md-4">
-                <img src="${basePath}/lib/photos/user_placeholder.png" class="center-block img-circle img-responsive">
+                <img src="http://oeerwig1e.bkt.clouddn.com/user_placeholder.png" class="center-block img-circle img-responsive">
                 <h3 class="text-center"><a href="${basePath}/game_awl/create">点击创建游戏</a></h3>
             </div>
         </div>
