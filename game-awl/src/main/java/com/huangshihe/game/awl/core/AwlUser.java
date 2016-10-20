@@ -69,9 +69,4 @@ public class AwlUser implements GameUser{
     public String getInfo() {
         return info;
     }
-
-//    /**
-//     * 空用户
-//     */
-//    public static final int EMPTY_AWL_USER = -1;
 }
