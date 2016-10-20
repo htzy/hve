@@ -69,7 +69,7 @@
             </div>
             <ul id="awlUserList" class="list-group">
             </ul>
-            <div id="awlUserInfo" class="row">特殊信息：</div>
+            <div id="awlUserInfo" class="row"></div>
         </div>
         <div class="col-sm-8">
             <textarea rows="20" cols="30" id="contentId"></textarea>
@@ -80,7 +80,7 @@
 <div class="section">
     <div class="container">
         <div class="row">
-            <div class="col-md-6">选择组员或投票</div>
+            <div class="col-md-6" id="teamDiv">选择组员或投票</div>
             <div class="col-md-6">
                 <input name="message" id="messageId"/>
                 <button id="sendButton" onClick="sendMsg()">提交</button>
@@ -142,12 +142,14 @@
             var $introduceInfo = $("#introduceInfo");
             if ($message.status == 0) {
                 // 重新生成等待中的玩家列表，并提示用户。
-                renderAwlUserList($message.userPackets);
+                renderWaitUserList($message.userPackets);
                 $introduceInfo.innerHTML = "游戏等待中，快去呼唤你的小伙伴来加入你创建的游戏吧...<br>等待中的玩家们：";
             } else if ($message.status == 1) {
-                // TODO now 进入正式游戏界面，并提示用户。
                 console.info("进入正式游戏，修改界面！");
-                $introduceInfo.innerHTML = "游戏进行中，享受游戏吧...<br>玩家们：";
+                // 生成玩家列表
+                renderAwlUserList($message);
+                // TODO now 生成任务？组队？
+
             } else if ($message.status == 2) {
                 console.info("游戏结束！");
                 alert("欢迎再来...see you~");
@@ -176,7 +178,7 @@
         $message.val("");
     }
 
-    function renderAwlUserList(userPackets) {
+    function renderWaitUserList(userPackets) {
         var $awlUserList = $("#awlUserList");
         // 记录需要添加的下标
         var readyToAdd = "";
@@ -200,6 +202,43 @@
                     $awlUserList.append("<li class='list-group-item' id='awlUser_" + userPacket.username + "'>" + userPacket.username + "<img src='" + userPacket.photo + "' " +
                             "class='img-circle img-responsive col-md-2'>女</li>");
                 }
+            }
+        }
+    }
+
+    function renderAwlUserList(packet) {
+        var $awlUserInfo = $("#awlUserInfo");
+        if ($awlUserInfo.innerHTML != null && $awlUserInfo.innerHTML != "") {
+            return;
+        }
+        var $awlUserList = $("#awlUserList");
+        var $introduceInfo = $("#introduceInfo");
+        var $teamDiv = $("#teamDiv");
+        var awlUserId = packet.awlUserId;
+        var userPackets = packet.userPackets;
+        $introduceInfo.innerHTML = "游戏进行中，享受游戏吧...<br>玩家们：";
+        $awlUserList.empty();
+        for (var i = 0; i < userPackets.length; i++) {
+            var userPacket = userPackets[i];
+            // 当显示自己身份时
+            if (userPacket.userId == awlUserId) {
+                $awlUserInfo.innerHTML = "特殊信息：" + userPacket.identityInfo;
+                // 好人1，坏人2
+                if (userPacket.identityType == 1) {
+                    $awlUserList.append("<li class='list-group-item alert-success' id='awlUser_" + userPacket.identityNum + "'>" + userPacket.identityNum + "<img src='" + userPacket.photo + "' " +
+                            "class='img-circle img-responsive col-md-2'>userPacket.identityName</li>");
+                } else {
+                    $awlUserList.append("<li class='list-group-item alert-danger' id='awlUser_" + userPacket.identityNum + "'>" + userPacket.identityNum + "<img src='" + userPacket.photo + "' " +
+                            "class='img-circle img-responsive col-md-2'>userPacket.identityName</li>");
+                }
+            } else {
+                $awlUserList.append("<li class='list-group-item alert-danger' id='awlUser_" + userPacket.identityNum + "'>" + userPacket.identityNum + "<img src='" + userPacket.photo + "' " +
+                        "class='img-circle img-responsive col-md-2'>未知身份</li>");
+            }
+            // 0当组长，开始组队，队伍人数：2人。
+            if(userPacket.identityNum == 0){
+                $teamDiv.empty();
+                // TODO now
             }
         }
     }

@@ -9,6 +9,11 @@ import com.huangshihe.rt.util.GlobalUtils;
  */
 public class UserPacket {
     /**
+     * 用户id
+     */
+    private int userId;
+
+    /**
      * 用户名
      */
     private String username;
@@ -44,6 +49,7 @@ public class UserPacket {
     public UserPacket(GameUser gameUser) {
         if (gameUser != null) {
             User user = User.getUser(gameUser.getUserId());
+            setUserId(user.getId());
             setUsername(user.getUsername());
             setSex(user.getSex());
             // 当用户没有头像时，使用默认头像
@@ -61,6 +67,14 @@ public class UserPacket {
                 setIdentityInfo(gameUser.getInfo());
             }
         }
+    }
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
     }
 
     public String getUsername() {
@@ -130,14 +144,15 @@ public class UserPacket {
     @Override
     public String toString() {
         return "UserPacket{" +
-                "username='" + getUsername() + '\'' +
-                ", sex=" + isSex() +
-                ", photo='" + getPhoto() + '\'' +
-                ", identityNum=" + getIdentityNum() +
-                ", identityType=" + getIdentityType() +
-                ", identityName='" + getIdentityName() + '\'' +
-                ", identityDescription='" + getIdentityDescription() + '\'' +
-                ", identityInfo='" + getIdentityInfo() + '\'' +
+                "userId=" + userId +
+                ", username='" + username + '\'' +
+                ", sex=" + sex +
+                ", photo='" + photo + '\'' +
+                ", identityNum=" + identityNum +
+                ", identityType=" + identityType +
+                ", identityName='" + identityName + '\'' +
+                ", identityDescription='" + identityDescription + '\'' +
+                ", identityInfo='" + identityInfo + '\'' +
                 '}';
     }
 }
