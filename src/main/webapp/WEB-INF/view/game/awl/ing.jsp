@@ -222,14 +222,16 @@
             var userPacket = userPackets[i];
             // 当显示自己身份时
             if (userPacket.userId == awlUserId) {
+                $awlUserInfo.val(userPacket.identityInfo);
+                $awlUserInfo.innerText = "1"+userPacket.identityInfo;
                 $awlUserInfo.innerHTML = "特殊信息：" + userPacket.identityInfo;
                 // 好人1，坏人2
                 if (userPacket.identityType == 1) {
                     $awlUserList.append("<li class='list-group-item alert-success' id='awlUser_" + userPacket.identityNum + "'>" + userPacket.identityNum + "<img src='" + userPacket.photo + "' " +
-                            "class='img-circle img-responsive col-md-2'>userPacket.identityName</li>");
+                            "class='img-circle img-responsive col-md-2'>"+userPacket.identityName+"</li>");
                 } else {
                     $awlUserList.append("<li class='list-group-item alert-danger' id='awlUser_" + userPacket.identityNum + "'>" + userPacket.identityNum + "<img src='" + userPacket.photo + "' " +
-                            "class='img-circle img-responsive col-md-2'>userPacket.identityName</li>");
+                            "class='img-circle img-responsive col-md-2'>"+userPacket.identityName+"</li>");
                 }
             } else {
                 $awlUserList.append("<li class='list-group-item alert-danger' id='awlUser_" + userPacket.identityNum + "'>" + userPacket.identityNum + "<img src='" + userPacket.photo + "' " +
@@ -239,6 +241,7 @@
             if(userPacket.identityNum == 0){
                 $teamDiv.empty();
                 // TODO now
+                console.info("create team");
             }
         }
     }
@@ -286,5 +289,182 @@
         coreWs.close();
         window.location.href = "${basePath}/game_awl/quit";
     }
+
+
+    //////////////////////////////////////////////
+
+    <%--function createNewTeam(currentLeaderNum, teamMemberCount, aliveGameUsersNum){--%>
+        <%--if($teamPosition.find("tr").length > 0){--%>
+            <%--return;--%>
+        <%--}--%>
+        <%--var title = $("<tr><td>new team:</td><tr>");--%>
+        <%--var teamTable = $("<table id='newTeam'></table>").append(title);--%>
+        <%--for(var i = 0; i < aliveGameUsersNum.length; i++){--%>
+            <%--teamTable.append($("<label><input type='checkbox' name='team_member_num' value='"+aliveGameUsersNum[i]+"'/>"+aliveGameUsersNum[i]+"</label>"))--%>
+        <%--}--%>
+        <%--var postTeam = $("<input type='button' value='submit'>").bind("click",{currentLeaderNum:currentLeaderNum,teamMemberCount:teamMemberCount,aliveGameUsersNum:aliveGameUsersNum},postNewTeam);--%>
+        <%--teamTable.append(postTeam);--%>
+        <%--$teamPosition.append(teamTable);--%>
+    <%--}--%>
+
+    <%--function postNewTeam(event){--%>
+        <%--// check checkbox size must equal currentTeamNum--%>
+        <%--var currentLeaderNum = event.data.currentLeaderNum;--%>
+        <%--var teamMemberCount = event.data.teamMemberCount;--%>
+        <%--var aliveGameUsersNum = event.data.aliveGameUsersNum;--%>
+        <%--var $teamMemberNumCheck = $("input[name='team_member_num']:checked");--%>
+        <%--if($teamMemberNumCheck.length != teamMemberCount){--%>
+            <%--alert("you can only choose " + teamMemberCount + " member!");--%>
+            <%--return;--%>
+        <%--}else{--%>
+            <%--var teamMemberNums="";--%>
+            <%--$teamMemberNumCheck.each(function(){--%>
+                <%--teamMemberNums+=($(this).val()+',');--%>
+            <%--});--%>
+            <%--$.post("${basePath}/awl/createTeam",--%>
+                    <%--{--%>
+                        <%--"teamMemberNums":teamMemberNums--%>
+                    <%--},--%>
+                    <%--function(result){--%>
+                        <%--// create vote after post successful.--%>
+                        <%--if(result.status == 0){--%>
+                            <%--$("#newTeam input").attr("disabled","disabled");--%>
+                            <%--createVote(currentLeaderNum, teamMemberCount, aliveGameUsersNum);--%>
+                        <%--}--%>
+                        <%--alert(result.info);--%>
+                    <%--},"json");--%>
+        <%--}--%>
+    <%--}--%>
+
+    <%--function createVote(currentLeaderNum, teamMemberCount, aliveGameUsersNum){--%>
+        <%--if($votePosition.find("tr").length > 0){--%>
+            <%--return;--%>
+        <%--}--%>
+        <%--var title = $("<tr><td>current leader num:"+currentLeaderNum+", please vote for this team!</td><tr>");--%>
+        <%--var voteTable = $("<table id='newVote'></table>").append(title);--%>
+
+        <%--// TODO put this post in front or in the end--%>
+        <%--$.post("${basePath}/awl/getTeamInfo",--%>
+                <%--{},--%>
+                <%--function(result){--%>
+                    <%--var membersNum = (result.membersNum+"").split(",");--%>
+                    <%--for(var i = 0; i < aliveGameUsersNum.length; i++){--%>
+                        <%--if(has(aliveGameUsersNum[i], membersNum)){--%>
+                            <%--voteTable.append($("<label><input type='checkbox' checked " +--%>
+                                    <%--"disabled value='"+aliveGameUsersNum[i]+"'/>"+aliveGameUsersNum[i]+"</label>"))--%>
+
+                        <%--}else{--%>
+                            <%--voteTable.append($("<label><input type='checkbox' disabled " +--%>
+                                    <%--"value='"+aliveGameUsersNum[i]+"'/>"+aliveGameUsersNum[i]+"</label>"));--%>
+                        <%--}--%>
+                    <%--}--%>
+                    <%--var post = $("<input type='button' onclick='postVote("+true+")' value='Yes'>" +--%>
+                            <%--"<input type='button' onclick='postVote("+false+")' value='No'>");--%>
+                    <%--voteTable.append(post);--%>
+                    <%--$votePosition.append(voteTable);--%>
+                <%--},"json");--%>
+    <%--}--%>
+
+    <%--function postVote(answer){--%>
+        <%--$.post("${basePath}/awl/postVote",--%>
+                <%--{--%>
+                    <%--"answer":answer--%>
+                <%--},--%>
+                <%--function(result){--%>
+                    <%--if(result.status == 0){--%>
+                        <%--$("#newVote input").attr("disabled","disabled");--%>
+                        <%--alert("success!");--%>
+                    <%--}else{--%>
+                        <%--alert(result.info);--%>
+                    <%--}--%>
+                <%--},"json");--%>
+    <%--}--%>
+
+    <%--function deleteTeam(){--%>
+<%--//        if($teamPosition.find("tr").length == 0){--%>
+<%--//            return;--%>
+<%--//        }--%>
+        <%--$teamPosition.children().remove();--%>
+    <%--}--%>
+    <%--function deleteVote(){--%>
+<%--//        if($votePosition.find("tr").length == 0){--%>
+<%--//            return;--%>
+<%--//        }--%>
+        <%--$votePosition.children().remove();--%>
+    <%--}--%>
+
+    <%--function deleteTask(){--%>
+        <%--$taskPosition.children().remove();--%>
+    <%--}--%>
+
+    <%--function deleteAll(){--%>
+        <%--deleteTeam();--%>
+        <%--deleteVote();--%>
+    <%--}--%>
+
+    <%--function has(value, arr){--%>
+        <%--for(var i = 0; i < arr.length; i++){--%>
+            <%--if(arr[i] == value){--%>
+                <%--return true;--%>
+            <%--}--%>
+        <%--}--%>
+        <%--return false;--%>
+    <%--}--%>
+
+    <%--function dealTask(task){--%>
+        <%--if(task == null || task == ""){--%>
+            <%--return;--%>
+        <%--}else{--%>
+            <%--createTask();--%>
+        <%--}--%>
+    <%--}--%>
+
+    <%--function createTask(){--%>
+        <%--if($taskPosition.find("tr").length > 0){--%>
+            <%--return;--%>
+        <%--}--%>
+        <%--var title = $("<tr><td>you have a task need to do</td><tr>");--%>
+        <%--var taskTable = $("<table id='newTask'></table>").append(title);--%>
+        <%--if(${loginUser.gameUser.identity.type}){--%>
+            <%--taskTable.append($("<input type='button' onclick='postTask("+true+")' value='Yes'>"));--%>
+        <%--}else{--%>
+            <%--taskTable.append($("<input type='button' onclick='postTask("+true+")' value='Yes'>" +--%>
+                    <%--"<input type='button' onclick='postTask("+false+")' value='No'>"))--%>
+        <%--}--%>
+        <%--$taskPosition.append(taskTable);--%>
+    <%--}--%>
+
+    <%--function postTask(answer){--%>
+        <%--$.post("${basePath}/awl/postTask",--%>
+                <%--{--%>
+                    <%--answer:answer--%>
+                <%--},function(result){--%>
+                    <%--if(result.status == 0){--%>
+                        <%--alert("success!");--%>
+                        <%--deleteTask();--%>
+                    <%--}else{--%>
+                        <%--alert(result.info);--%>
+                    <%--}--%>
+                <%--},"json");--%>
+    <%--}--%>
+
+    <%--function toKill(){--%>
+        <%--var num = $("#num").val();--%>
+        <%--if(num == null || num == ""){--%>
+            <%--alert("you should input num!");--%>
+            <%--return;--%>
+        <%--}--%>
+        <%--$.post("${basePath}/awl/toKill",--%>
+                <%--{--%>
+                    <%--num:num--%>
+                <%--},function(result){--%>
+                    <%--if(result.status == 0){--%>
+                        <%--alert("game is over!");--%>
+                    <%--}else{--%>
+                        <%--alert(result.info);--%>
+                    <%--}--%>
+                <%--},"json");--%>
+    <%--}--%>
+
 
 </script>

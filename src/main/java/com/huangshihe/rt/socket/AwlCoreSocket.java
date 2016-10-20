@@ -72,7 +72,7 @@ public class AwlCoreSocket {
         awl.add(new AwlUser(awlUserId));
         connections.add(this);
 
-        BasePacket basePacket = new BasePacket(creatorId, awl);
+        BasePacket basePacket = new BasePacket(awlUserId, awl);
         try {
             AwlCoreSocket.broadCast(objectMapper.writeValueAsString(basePacket));
         } catch (JsonProcessingException e) {

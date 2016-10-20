@@ -26,7 +26,8 @@ public class BaseConfig extends JFinalConfig {
         me.setDevMode(PropKit.getBoolean("devMode", false));
         me.setViewType(ViewType.JSP);
         me.setUrlParaSeparator("-");
-        me.setErrorRenderFactory(new ErrorRenderFactory());
+//        you can use error render factory to write you own error solution.
+//        me.setErrorRenderFactory(new ErrorRenderFactory());
         me.setError401View("/WEB-INF/view/error.jsp");
         me.setError404View("/WEB-INF/view/error.jsp");
     }
