@@ -11,6 +11,9 @@
     <title>error</title>
 </head>
 <body>
+    sorry, system not support the action you just do.<br>
+    you can click this <a href="${basePath}/">link</a> back to index page.
+
 
 </body>
 </html>

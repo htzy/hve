@@ -1,6 +1,5 @@
 package com.huangshihe.rt.socket;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.huangshihe.game.awl.core.Awl;
 import com.huangshihe.game.awl.core.AwlUser;
@@ -26,34 +25,38 @@ public class AwlCoreSocket {
      */
     private static final Set<AwlCoreSocket> connections = new CopyOnWriteArraySet<AwlCoreSocket>();
 
+    // TODO change set to map??
+//    private static final Map<String,Object> connections = new HashMap<String,Object>();
+
     private User user;
 
     private int creatorId;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private int awlUserId;
+
+    private static ObjectMapper objectMapper = new ObjectMapper();
 
     /**
      * WebSocket Session
      */
     private Session session;
 
-    public AwlCoreSocket() {
-    }
 
     /**
      * 打开连接
      *
      * @param session
-     * @param creatorId
-     * @param awlUserId
+     * @param mCreatorId
+     * @param mAwlUserId
      */
     @OnOpen
     public void onOpen(Session session,
-                       @PathParam(value = "creatorId") int creatorId,
-                       @PathParam(value = "awlUserId") int awlUserId) {
+                       @PathParam(value = "creatorId") int mCreatorId,
+                       @PathParam(value = "awlUserId") int mAwlUserId) {
 
         this.session = session;
-        this.creatorId = creatorId;
+        this.creatorId = mCreatorId;
+        this.awlUserId = mAwlUserId;
         Awl awl = AwlCache.getInstance().get(creatorId);
         // 当玩家掉线后重新进入时，重新设置游戏状态为等待
         if (awl != null && awl.getStatus() == Awl.STATUS_DELETE_GAMER) {
@@ -72,48 +75,37 @@ public class AwlCoreSocket {
         awl.add(new AwlUser(awlUserId));
         connections.add(this);
 
-        BasePacket basePacket = new BasePacket(creatorId, awl);
-        try {
-            AwlCoreSocket.broadCast(objectMapper.writeValueAsString(basePacket));
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
+        AwlCoreSocket.broadCast(new BasePacket(awl));
     }
 
     /**
      * 关闭连接
      */
     @OnClose
-    public void onClose(@PathParam(value = "awlUserId") int awlUserId) {
+    public void onClose() {
         connections.remove(this);
         // 当有玩家掉线，更新当前游戏玩家信息（去除该掉线玩家），并通知客户端
         Awl awl = AwlCache.getInstance().get(creatorId);
         BasePacket basePacket;
         // 当创建者退出时，结束该游戏；当参与者退出时，从玩家列表中删除该玩家
         if (awl == null || creatorId == awlUserId) {
-            basePacket = new BasePacket(awlUserId, null, Awl.STATUS_ED);
+            basePacket = new BasePacket(null, Awl.STATUS_ED);
         } else {
-            basePacket = new BasePacket(awlUserId, awl.getGamer(awlUserId), Awl.STATUS_DELETE_GAMER);
+            basePacket = new BasePacket(awl.getGamer(awlUserId), Awl.STATUS_DELETE_GAMER);
             awl.remove(awl.getGamer(awlUserId));
         }
-        try {
-            AwlCoreSocket.broadCast(objectMapper.writeValueAsString(basePacket));
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
+        AwlCoreSocket.broadCast(basePacket);
     }
 
     /**
      * 接收信息
      *
      * @param message
-     * @param awlUserId
      */
     @OnMessage
-    public void onMessage(String message,
-                          @PathParam(value = "awlUserId") int awlUserId) {
+    public void onMessage(String message) {
         // TODO 规定接收数据方式，解析message信息
-        AwlCoreSocket.broadCast("hello:" + ">" + message);
+        AwlCoreSocket.broadCast(user.getUsername() + ">" + message);
     }
 
     /**
@@ -132,6 +124,7 @@ public class AwlCoreSocket {
      *
      * @param message
      */
+    @Deprecated
     private static void broadCast(String message) {
         for (AwlCoreSocket socket : connections) {
             try {
@@ -148,5 +141,27 @@ public class AwlCoreSocket {
         }
     }
 
+    /**
+     * 发送或广播信息
+     *
+     * @param basePacket
+     */
+    private static void broadCast(BasePacket basePacket) {
+        for (AwlCoreSocket socket : connections) {
+            try {
+                synchronized (socket) {
+                    // 设置发送人
+                    basePacket.setAwlUserId(socket.awlUserId);
+                    socket.session.getBasicRemote().sendText(objectMapper.writeValueAsString(basePacket));
+                }
+            } catch (IOException e) {
+                connections.remove(socket);
+                try {
+                    socket.session.close();
+                } catch (IOException ignored) {
+                }
+            }
+        }
+    }
 
 }

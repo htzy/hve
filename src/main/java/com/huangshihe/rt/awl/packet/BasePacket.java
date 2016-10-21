@@ -4,6 +4,7 @@ import com.huangshihe.game.awl.core.Awl;
 import com.huangshihe.game.core.GameUser;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -64,9 +65,8 @@ public class BasePacket {
     private TaskPacket taskPacket;
 
 
-    public BasePacket(int awlUserId, Awl awl) {
+    public BasePacket(Awl awl) {
         setCreatorId(awl.getCreatorId());
-        setAwlUserId(awlUserId);
         setSuccessTimes(awl.getTotalTaskSuccessCount());
         setFailTimes(awl.getTotalTaskFailCount());
         setStatus(awl.getStatus());
@@ -76,10 +76,10 @@ public class BasePacket {
 //        }
         getUserPackets().addAll(awl.getGamers().stream().map(UserPacket::new)
                 .collect(Collectors.toList()));
+        getUserPackets().sort(Comparator.comparing(UserPacket::getIdentityNum));
     }
 
-    public BasePacket(int awlUserId, GameUser gameUser, int status) {
-        setAwlUserId(awlUserId);
+    public BasePacket(GameUser gameUser, int status) {
         setStatus(status);
         getUserPackets().add(new UserPacket(gameUser));
     }
