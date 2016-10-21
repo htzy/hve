@@ -14,11 +14,17 @@ public class Team {
     private Date createTime;
     private int status;
 
-    private Team(int leaderNum, AwlUser... awlUsers) {
+    public Team(int leaderNum, AwlUser... awlUsers) {
         setLeaderNum(leaderNum);
         setMembers(awlUsers);
-        setCreateTime(new Date());
         setStatus(STATUS_ING);
+        setCreateTime(new Date());
+    }
+
+    public Team(int leaderNum){
+        setLeaderNum(leaderNum);
+        setStatus(STATUS_ING);
+        setCreateTime(new Date());
     }
 
     public int getLeaderNum() {
@@ -59,11 +65,12 @@ public class Team {
         this.status = status;
     }
 
-    /**
-     * 过期的队伍
-     */
-    public static final int STATUS_HISTORY = 1;
+//    /**
+//     * 过期的队伍
+//     */
+//    public static final int STATUS_HISTORY = 1;
 
+    // 失败和成功的队伍都属于过期的队伍
     /**
      * 组建失败的队伍
      */

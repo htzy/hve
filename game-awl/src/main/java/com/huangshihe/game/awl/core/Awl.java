@@ -65,6 +65,7 @@ public class Awl implements Game {
         totalTaskFailCount = 0;
         // 游戏开始
         status = STATUS_ING;
+        createTeam(new Team(currentLeaderNum));
         return true;
     }
 
@@ -173,6 +174,15 @@ public class Awl implements Game {
 
     public boolean createTeam(Team team) {
         return getTeamList().add(team);
+    }
+
+    /**
+     * 获得当前的队伍（状态为：创建中，其余状态：成功，失败等均为过时状态）
+     *
+     * @return
+     */
+    public Team getCurrentTeam() {
+        return getTeamList().stream().filter(team -> team.getStatus() == Team.STATUS_ING).findFirst().orElse(null);
     }
 
     public int getCurrentLeaderNum() {

@@ -1,15 +1,28 @@
 package com.huangshihe.rt.awl.packet;
 
+import com.huangshihe.game.awl.core.AwlUser;
+import com.huangshihe.game.awl.core.Team;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by Administrator on 2016/8/14.
  */
 public class TeamPacket {
+
+    // TODO change id to num
     private int creatorId;
 
     private List<Integer> members;
+
+    public TeamPacket(Team team) {
+        if (team != null) {
+            setCreatorId(team.getLeaderNum());
+            getMembers().addAll(team.getMembers().stream().map(AwlUser::getNum).collect(Collectors.toList()));
+        }
+    }
 
     public TeamPacket(int creatorId, List<Integer> members) {
         setCreatorId(creatorId);
@@ -37,7 +50,6 @@ public class TeamPacket {
         }
         this.members = members;
     }
-
 
     @Override
     public String toString() {

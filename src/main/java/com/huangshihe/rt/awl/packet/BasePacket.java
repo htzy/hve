@@ -1,6 +1,7 @@
 package com.huangshihe.rt.awl.packet;
 
 import com.huangshihe.game.awl.core.Awl;
+import com.huangshihe.game.awl.core.Team;
 import com.huangshihe.game.core.GameUser;
 
 import java.util.ArrayList;
@@ -64,13 +65,20 @@ public class BasePacket {
      */
     private TaskPacket taskPacket;
 
-
+    /**
+     * 对于该awl对象的所有玩家生效的基本信息包
+     *
+     * @param awl
+     */
     public BasePacket(Awl awl) {
         setCreatorId(awl.getCreatorId());
         setSuccessTimes(awl.getTotalTaskSuccessCount());
         setFailTimes(awl.getTotalTaskFailCount());
         setStatus(awl.getStatus());
-
+        Team team = awl.getCurrentTeam();
+        if (team != null) {
+            setTeamPacket(new TeamPacket(team));
+        }
 //        for (GameUser gameUser : awl.getGamers()){
 //            getUserPackets().add(new UserPacket(gameUser));
 //        }
@@ -79,6 +87,12 @@ public class BasePacket {
         getUserPackets().sort(Comparator.comparing(UserPacket::getIdentityNum));
     }
 
+    /**
+     * 对于该玩家生效的基本信息包
+     *
+     * @param gameUser
+     * @param status
+     */
     public BasePacket(GameUser gameUser, int status) {
         setStatus(status);
         getUserPackets().add(new UserPacket(gameUser));
