@@ -165,6 +165,9 @@ public class Awl implements Game {
     }
 
     public List<Team> getTeamList() {
+        if(teamList == null){
+            teamList = new ArrayList<Team>();
+        }
         return teamList;
     }
 

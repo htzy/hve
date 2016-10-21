@@ -12,29 +12,32 @@ import java.util.stream.Collectors;
  */
 public class TeamPacket {
 
-    // TODO change id to num
-    private int creatorId;
+    private int creatorNum;
 
     private List<Integer> members;
 
+    private int memberCount;
+
     public TeamPacket(Team team) {
         if (team != null) {
-            setCreatorId(team.getLeaderNum());
+            setCreatorNum(team.getLeaderNum());
+            setMemberCount(team.getMemberCount());
             getMembers().addAll(team.getMembers().stream().map(AwlUser::getNum).collect(Collectors.toList()));
         }
     }
 
-    public TeamPacket(int creatorId, List<Integer> members) {
-        setCreatorId(creatorId);
+    public TeamPacket(int creatorNum, List<Integer> members) {
+        setCreatorNum(creatorNum);
         setMembers(members);
+        setMemberCount(Team.memberCount[creatorNum]);
     }
 
-    public int getCreatorId() {
-        return creatorId;
+    public int getCreatorNum() {
+        return creatorNum;
     }
 
-    public void setCreatorId(int creatorId) {
-        this.creatorId = creatorId;
+    public void setCreatorNum(int creatorNum) {
+        this.creatorNum = creatorNum;
     }
 
     public List<Integer> getMembers() {
@@ -51,11 +54,20 @@ public class TeamPacket {
         this.members = members;
     }
 
+    public int getMemberCount() {
+        return memberCount;
+    }
+
+    public void setMemberCount(int memberCount) {
+        this.memberCount = memberCount;
+    }
+
     @Override
     public String toString() {
         return "TeamPacket{" +
-                "creatorId=" + getCreatorId() +
-                ", members=" + getMembers() +
+                "creatorNum=" + creatorNum +
+                ", members=" + members +
+                ", memberCount=" + memberCount +
                 '}';
     }
 }

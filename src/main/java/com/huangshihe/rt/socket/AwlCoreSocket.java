@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.huangshihe.game.awl.core.Awl;
 import com.huangshihe.game.awl.core.AwlUser;
 import com.huangshihe.game.awl.manage.AwlCache;
+import com.huangshihe.rt.awl.packet.MessagePacket;
 import com.huangshihe.rt.awl.packet.BasePacket;
+import com.huangshihe.rt.awl.packet.TeamPacket;
 import com.huangshihe.rt.model.User;
 
 import javax.websocket.*;
@@ -105,7 +107,18 @@ public class AwlCoreSocket {
     @OnMessage
     public void onMessage(String message) {
         // TODO 规定接收数据方式，解析message信息
+//      接收格式：操作+数据
+//      {"operate":"postTeam/postTask/getTeamInfo/postVote","data":"Team.class/Task.class/Team.class/Vote.class"}
         AwlCoreSocket.broadCast(user.getUsername() + ">" + message);
+        try {
+            MessagePacket packet = objectMapper.readValue(message, MessagePacket.class);
+            if ("postTeam".equals(packet.getOperate())) {
+                TeamPacket teamPacket = objectMapper.readValue(packet.getData(), TeamPacket.class);
+                System.out.println("teamPacket = " + teamPacket);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**

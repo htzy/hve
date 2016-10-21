@@ -21,7 +21,7 @@ public class Team {
         setCreateTime(new Date());
     }
 
-    public Team(int leaderNum){
+    public Team(int leaderNum) {
         setLeaderNum(leaderNum);
         setStatus(STATUS_ING);
         setCreateTime(new Date());
@@ -43,7 +43,7 @@ public class Team {
     }
 
     public void setMembers(AwlUser... awlUsers) {
-        if (awlUsers.length < 2 || awlUsers.length > 3) {
+        if (awlUsers.length != getMemberCount()) {
             throw new IllegalArgumentException("team member length not in [2,3]");
         }
         Arrays.stream(awlUsers).forEach(awlUser -> getMembers().add(awlUser));
@@ -64,6 +64,12 @@ public class Team {
     public void setStatus(int status) {
         this.status = status;
     }
+
+    public int getMemberCount() {
+        return memberCount[getLeaderNum()];
+    }
+
+    public static int memberCount[] = {2, 3, 2, 3, 3};
 
 //    /**
 //     * 过期的队伍

@@ -143,12 +143,12 @@
             if ($message.status == 0) {
                 // 重新生成等待中的玩家列表，并提示用户。
                 renderWaitUserList($message.userPackets);
-                $introduceInfo.innerHTML = "游戏等待中，快去呼唤你的小伙伴来加入你创建的游戏吧...<br>等待中的玩家们：";
+                $introduceInfo.html("游戏等待中，快去呼唤你的小伙伴来加入你创建的游戏吧...<br>等待中的玩家们：");
             } else if ($message.status == 1) {
                 console.info("进入正式游戏，修改界面！");
                 // 生成玩家列表
                 renderAwlUserList($message);
-                createTeam($message);
+                renderTeam($message);
 
             } else if ($message.status == 2) {
                 console.info("游戏结束！");
@@ -157,7 +157,7 @@
             } else if ($message.status == -1) {
                 // 删除已退出玩家
                 deleteAwlUser($message.userPackets);
-                $introduceInfo.innerHTML = "有人退出了！游戏进入等待中，快去呼唤你的小伙伴来加入你创建的游戏吧...<br>等待中的玩家们：";
+                $introduceInfo.html("有人退出了！游戏进入等待中，快去呼唤你的小伙伴来加入你创建的游戏吧...<br>等待中的玩家们：");
             }
         };
 
@@ -215,7 +215,7 @@
         var $introduceInfo = $("#introduceInfo");
         var awlUserId = packet.awlUserId;
         var userPackets = packet.userPackets;
-        $introduceInfo.innerHTML = "游戏进行中，享受游戏吧...<br>玩家们：";
+        $introduceInfo.html("游戏进行中，享受游戏吧...<br>玩家们：");
         $awlUserList.empty();
         for (var i = 0; i < userPackets.length; i++) {
             var userPacket = userPackets[i];
@@ -281,224 +281,187 @@
         window.location.href = "${basePath}/game_awl/quit";
     }
 
-    function createTeam(basePacket) {
+    function renderTeam(basePacket) {
         var teamPacket = basePacket.teamPacket;
-        var userPackets = basePacket.userPackets;
         if (teamPacket == null || teamPacket == "") {
             return;
         }
-        for(var i=0;i<userPackets.length;i++){
-            if(userPackets[i].identityNum == teamPacket.creatorId){
-                // TODO now
-            }
+        var leaderPacket = basePacket.userPackets[teamPacket.creatorNum];
+        if (basePacket.awlUserId == leaderPacket.userId) {
+            createTeam(basePacket);
         }
+    }
 
-        // 0当组长，开始组队，队伍人数：2人。
-        if (userPacket.identityNum == 0) {
-            $teamDiv.empty();
-            // TODO now
-            console.info("create team");
-        }
-
+    function createTeam(basePacket) {
         var $teamDiv = $("#teamDiv");
         if ($teamDiv.find("tr").length > 0) {
             return;
         }
-
+        var teamPacket = basePacket.teamPacket;
+        var userPackets = basePacket.userPackets;
         var title = $("<tr><td>现请您勾选如下玩家，组建队伍！</td></tr>");
         var teamTable = $("<table id='newTeam'></table>").append(title);
-        var userPackets = basePacket.userPackets;
         for (var i = 0; i < userPackets.length; i++) {
             teamTable.append($("<label><input type='checkbox' name='team_member_num' value='" + userPackets[i].identityNum + "'/>" + userPackets[i].identityNum + "</label>"))
         }
-        var postTeam = $("<input type='button' value='submit'>").bind("click", {
-            currentLeaderNum: currentLeaderNum,
-            teamMemberCount: teamMemberCount,
-            aliveGameUsersNum: aliveGameUsersNum
-        }, postNewTeam);
+        var postTeam = $("<input type='button' value='提交'>").bind("click", {currentLeaderNum: teamPacket.creatorNum,teamMemberCount: teamPacket.memberCount}, postTeam);
         teamTable.append(postTeam);
         $teamDiv.append(teamTable);
-
     }
 
-    //////////////////////////////////////////////
-
-    function createNewTeam(currentLeaderNum, teamMemberCount, aliveGameUsersNum) {
-        if ($teamPosition.find("tr").length > 0) {
-            return;
-        }
-        var title = $("<tr><td>new team:</td><tr>");
-        var teamTable = $("<table id='newTeam'></table>").append(title);
-        for (var i = 0; i < aliveGameUsersNum.length; i++) {
-            teamTable.append($("<label><input type='checkbox' name='team_member_num' value='" + aliveGameUsersNum[i] + "'/>" + aliveGameUsersNum[i] + "</label>"))
-        }
-        var postTeam = $("<input type='button' value='submit'>").bind("click", {
-            currentLeaderNum: currentLeaderNum,
-            teamMemberCount: teamMemberCount,
-            aliveGameUsersNum: aliveGameUsersNum
-        }, postNewTeam);
-        teamTable.append(postTeam);
-        $teamPosition.append(teamTable);
-    }
-
-    function postNewTeam(event) {
+    function postTeam(event) {
+        console.info(event);
         // check checkbox size must equal currentTeamNum
         var currentLeaderNum = event.data.currentLeaderNum;
+        console.info(currentLeaderNum);
         var teamMemberCount = event.data.teamMemberCount;
-        var aliveGameUsersNum = event.data.aliveGameUsersNum;
+        console.info(teamMemberCount);
         var $teamMemberNumCheck = $("input[name='team_member_num']:checked");
+        console.info($teamMemberNumCheck);
         if ($teamMemberNumCheck.length != teamMemberCount) {
-            alert("you can only choose " + teamMemberCount + " member!");
-            return;
+            alert("你只能勾选" + teamMemberCount + "个成员！");
         } else {
             var teamMemberNums = "";
             $teamMemberNumCheck.each(function () {
                 teamMemberNums += ($(this).val() + ',');
             });
-            $.post("${basePath}/awl/createTeam",
-                    {
-                        "teamMemberNums": teamMemberNums
-                    },
-                    function (result) {
-                        // create vote after post successful.
-                        if (result.status == 0) {
-                            $("#newTeam input").attr("disabled", "disabled");
-                            createVote(currentLeaderNum, teamMemberCount, aliveGameUsersNum);
-                        }
-                        alert(result.info);
-                    }, "json");
+            coreWs.send("{\"operate\":\"postTeam\"," +
+                    "\"data\":{\"creatorNum\":\"" + currentLeaderNum + "\",\"members\":\"" + teamMemberNums + "\"}}");
+            $("#newTeam input").attr("disabled", "disabled");
+            alert("您组建的队伍信息已提交！")
         }
     }
 
-    function createVote(currentLeaderNum, teamMemberCount, aliveGameUsersNum) {
-        if ($votePosition.find("tr").length > 0) {
-            return;
-        }
-        var title = $("<tr><td>current leader num:" + currentLeaderNum + ", please vote for this team!</td><tr>");
-        var voteTable = $("<table id='newVote'></table>").append(title);
+    //////////////////////////////////////////////
 
-        // TODO put this post in front or in the end
-        $.post("${basePath}/awl/getTeamInfo",
-                {},
-                function (result) {
-                    var membersNum = (result.membersNum + "").split(",");
-                    for (var i = 0; i < aliveGameUsersNum.length; i++) {
-                        if (has(aliveGameUsersNum[i], membersNum)) {
-                            voteTable.append($("<label><input type='checkbox' checked " +
-                                    "disabled value='" + aliveGameUsersNum[i] + "'/>" + aliveGameUsersNum[i] + "</label>"))
+    <%--function createVote(currentLeaderNum, teamMemberCount, aliveGameUsersNum) {--%>
+    <%--if ($votePosition.find("tr").length > 0) {--%>
+    <%--return;--%>
+    <%--}--%>
+    <%--var title = $("<tr><td>current leader num:" + currentLeaderNum + ", please vote for this team!</td><tr>");--%>
+    <%--var voteTable = $("<table id='newVote'></table>").append(title);--%>
 
-                        } else {
-                            voteTable.append($("<label><input type='checkbox' disabled " +
-                                    "value='" + aliveGameUsersNum[i] + "'/>" + aliveGameUsersNum[i] + "</label>"));
-                        }
-                    }
-                    var post = $("<input type='button' onclick='postVote(" + true + ")' value='Yes'>" +
-                            "<input type='button' onclick='postVote(" + false + ")' value='No'>");
-                    voteTable.append(post);
-                    $votePosition.append(voteTable);
-                }, "json");
-    }
+    <%--// TODO put this post in front or in the end--%>
+    <%--$.post("${basePath}/awl/getTeamInfo",--%>
+    <%--{},--%>
+    <%--function (result) {--%>
+    <%--var membersNum = (result.membersNum + "").split(",");--%>
+    <%--for (var i = 0; i < aliveGameUsersNum.length; i++) {--%>
+    <%--if (has(aliveGameUsersNum[i], membersNum)) {--%>
+    <%--voteTable.append($("<label><input type='checkbox' checked " +--%>
+    <%--"disabled value='" + aliveGameUsersNum[i] + "'/>" + aliveGameUsersNum[i] + "</label>"))--%>
 
-    function postVote(answer) {
-        $.post("${basePath}/awl/postVote",
-                {
-                    "answer": answer
-                },
-                function (result) {
-                    if (result.status == 0) {
-                        $("#newVote input").attr("disabled", "disabled");
-                        alert("success!");
-                    } else {
-                        alert(result.info);
-                    }
-                }, "json");
-    }
+    <%--} else {--%>
+    <%--voteTable.append($("<label><input type='checkbox' disabled " +--%>
+    <%--"value='" + aliveGameUsersNum[i] + "'/>" + aliveGameUsersNum[i] + "</label>"));--%>
+    <%--}--%>
+    <%--}--%>
+    <%--var post = $("<input type='button' onclick='postVote(" + true + ")' value='Yes'>" +--%>
+    <%--"<input type='button' onclick='postVote(" + false + ")' value='No'>");--%>
+    <%--voteTable.append(post);--%>
+    <%--$votePosition.append(voteTable);--%>
+    <%--}, "json");--%>
+    <%--}--%>
 
-    function deleteTeam() {
-        //        if($teamPosition.find("tr").length == 0){
-        //            return;
-        //        }
-        $teamPosition.children().remove();
-    }
-    function deleteVote() {
-        //        if($votePosition.find("tr").length == 0){
-        //            return;
-        //        }
-        $votePosition.children().remove();
-    }
+    <%--function postVote(answer) {--%>
+    <%--$.post("${basePath}/awl/postVote",--%>
+    <%--{--%>
+    <%--"answer": answer--%>
+    <%--},--%>
+    <%--function (result) {--%>
+    <%--if (result.status == 0) {--%>
+    <%--$("#newVote input").attr("disabled", "disabled");--%>
+    <%--alert("success!");--%>
+    <%--} else {--%>
+    <%--alert(result.info);--%>
+    <%--}--%>
+    <%--}, "json");--%>
+    <%--}--%>
 
-    function deleteTask() {
-        $taskPosition.children().remove();
-    }
+    <%--function deleteTeam() {--%>
+    <%--//        if($teamPosition.find("tr").length == 0){--%>
+    <%--//            return;--%>
+    <%--//        }--%>
+    <%--$teamPosition.children().remove();--%>
+    <%--}--%>
+    <%--function deleteVote() {--%>
+    <%--//        if($votePosition.find("tr").length == 0){--%>
+    <%--//            return;--%>
+    <%--//        }--%>
+    <%--$votePosition.children().remove();--%>
+    <%--}--%>
 
-    function deleteAll() {
-        deleteTeam();
-        deleteVote();
-    }
+    <%--function deleteTask() {--%>
+    <%--$taskPosition.children().remove();--%>
+    <%--}--%>
 
-    function has(value, arr) {
-        for (var i = 0; i < arr.length; i++) {
-            if (arr[i] == value) {
-                return true;
-            }
-        }
-        return false;
-    }
+    <%--function deleteAll() {--%>
+    <%--deleteTeam();--%>
+    <%--deleteVote();--%>
+    <%--}--%>
 
-    function dealTask(task) {
-        if (task == null || task == "") {
-            return;
-        } else {
-            createTask();
-        }
-    }
+    <%--function has(value, arr) {--%>
+    <%--for (var i = 0; i < arr.length; i++) {--%>
+    <%--if (arr[i] == value) {--%>
+    <%--return true;--%>
+    <%--}--%>
+    <%--}--%>
+    <%--return false;--%>
+    <%--}--%>
 
-    function createTask() {
-        if ($taskPosition.find("tr").length > 0) {
-            return;
-        }
-        var title = $("<tr><td>you have a task need to do</td><tr>");
-        var taskTable = $("<table id='newTask'></table>").append(title);
-        if (${loginUser.gameUser.identity.type}) {
-            taskTable.append($("<input type='button' onclick='postTask(" + true + ")' value='Yes'>"));
-        } else {
-            taskTable.append($("<input type='button' onclick='postTask(" + true + ")' value='Yes'>" +
-                    "<input type='button' onclick='postTask(" + false + ")' value='No'>"))
-        }
-        $taskPosition.append(taskTable);
-    }
+    <%--function dealTask(task) {--%>
+    <%--if (task == null || task == "") {--%>
+    <%--return;--%>
+    <%--} else {--%>
+    <%--createTask();--%>
+    <%--}--%>
+    <%--}--%>
 
-    function postTask(answer) {
-        $.post("${basePath}/awl/postTask",
-                {
-                    answer: answer
-                }, function (result) {
-                    if (result.status == 0) {
-                        alert("success!");
-                        deleteTask();
-                    } else {
-                        alert(result.info);
-                    }
-                }, "json");
-    }
+    <%--function createTask() {--%>
+    <%--if ($taskPosition.find("tr").length > 0) {--%>
+    <%--return;--%>
+    <%--}--%>
+    <%--var title = $("<tr><td>you have a task need to do</td><tr>");--%>
+    <%--var taskTable = $("<table id='newTask'></table>").append(title);--%>
+    <%--if (${loginUser.gameUser.identity.type}) {--%>
+    <%--taskTable.append($("<input type='button' onclick='postTask(" + true + ")' value='Yes'>"));--%>
+    <%--} else {--%>
+    <%--taskTable.append($("<input type='button' onclick='postTask(" + true + ")' value='Yes'>" +--%>
+    <%--"<input type='button' onclick='postTask(" + false + ")' value='No'>"))--%>
+    <%--}--%>
+    <%--$taskPosition.append(taskTable);--%>
+    <%--}--%>
 
-    function toKill() {
-        var num = $("#num").val();
-        if (num == null || num == "") {
-            alert("you should input num!");
-            return;
-        }
-        $.post("${basePath}/awl/toKill",
-                {
-                    num: num
-                }, function (result) {
-                    if (result.status == 0) {
-                        alert("game is over!");
-                    } else {
-                        alert(result.info);
-                    }
-                }, "json");
-    }
+    <%--function postTask(answer) {--%>
+    <%--$.post("${basePath}/awl/postTask",--%>
+    <%--{--%>
+    <%--answer: answer--%>
+    <%--}, function (result) {--%>
+    <%--if (result.status == 0) {--%>
+    <%--alert("success!");--%>
+    <%--deleteTask();--%>
+    <%--} else {--%>
+    <%--alert(result.info);--%>
+    <%--}--%>
+    <%--}, "json");--%>
+    <%--}--%>
 
+    <%--function toKill() {--%>
+    <%--var num = $("#num").val();--%>
+    <%--if (num == null || num == "") {--%>
+    <%--alert("you should input num!");--%>
+    <%--return;--%>
+    <%--}--%>
+    <%--$.post("${basePath}/awl/toKill",--%>
+    <%--{--%>
+    <%--num: num--%>
+    <%--}, function (result) {--%>
+    <%--if (result.status == 0) {--%>
+    <%--alert("game is over!");--%>
+    <%--} else {--%>
+    <%--alert(result.info);--%>
+    <%--}--%>
+    <%--}, "json");--%>
+    <%--}--%>
 
 </script>
