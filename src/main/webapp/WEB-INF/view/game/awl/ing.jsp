@@ -304,20 +304,19 @@
         for (var i = 0; i < userPackets.length; i++) {
             teamTable.append($("<label><input type='checkbox' name='team_member_num' value='" + userPackets[i].identityNum + "'/>" + userPackets[i].identityNum + "</label>"))
         }
-        var postTeam = $("<input type='button' value='提交'>").bind("click", {currentLeaderNum: teamPacket.creatorNum,teamMemberCount: teamPacket.memberCount}, postTeam);
-        teamTable.append(postTeam);
+        var postBtn = $("<input type='button' value='提交'>").bind("click", {
+            currentLeaderNum: teamPacket.creatorNum,
+            teamMemberCount: teamPacket.memberCount
+        }, postTeam);
+        teamTable.append(postBtn);
         $teamDiv.append(teamTable);
     }
 
     function postTeam(event) {
-        console.info(event);
         // check checkbox size must equal currentTeamNum
         var currentLeaderNum = event.data.currentLeaderNum;
-        console.info(currentLeaderNum);
         var teamMemberCount = event.data.teamMemberCount;
-        console.info(teamMemberCount);
         var $teamMemberNumCheck = $("input[name='team_member_num']:checked");
-        console.info($teamMemberNumCheck);
         if ($teamMemberNumCheck.length != teamMemberCount) {
             alert("你只能勾选" + teamMemberCount + "个成员！");
         } else {
@@ -325,8 +324,9 @@
             $teamMemberNumCheck.each(function () {
                 teamMemberNums += ($(this).val() + ',');
             });
+            teamMemberNums = teamMemberNums.substring(0, teamMemberNums.length - 1);
             coreWs.send("{\"operate\":\"postTeam\"," +
-                    "\"data\":{\"creatorNum\":\"" + currentLeaderNum + "\",\"members\":\"" + teamMemberNums + "\"}}");
+                    "\"teamPacket\":{\"creatorNum\":" + currentLeaderNum + ",\"members\":[" + teamMemberNums + "]}}");
             $("#newTeam input").attr("disabled", "disabled");
             alert("您组建的队伍信息已提交！")
         }

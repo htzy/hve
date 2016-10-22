@@ -108,12 +108,11 @@ public class AwlCoreSocket {
     public void onMessage(String message) {
         // TODO 规定接收数据方式，解析message信息
 //      接收格式：操作+数据
-//      {"operate":"postTeam/postTask/getTeamInfo/postVote","data":"Team.class/Task.class/Team.class/Vote.class"}
-        AwlCoreSocket.broadCast(user.getUsername() + ">" + message);
+//      {"operate":"postTeam/postTask/getTeamInfo/postVote","data":"TeamPacket.class/Task.class/Team.class/Vote.class"}
         try {
             MessagePacket packet = objectMapper.readValue(message, MessagePacket.class);
             if ("postTeam".equals(packet.getOperate())) {
-                TeamPacket teamPacket = objectMapper.readValue(packet.getData(), TeamPacket.class);
+                TeamPacket teamPacket = packet.getTeamPacket();
                 System.out.println("teamPacket = " + teamPacket);
             }
         } catch (IOException e) {

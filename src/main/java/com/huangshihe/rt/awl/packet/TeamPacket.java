@@ -18,6 +18,10 @@ public class TeamPacket {
 
     private int memberCount;
 
+    public TeamPacket(){
+
+    }
+
     public TeamPacket(Team team) {
         if (team != null) {
             setCreatorNum(team.getLeaderNum());
