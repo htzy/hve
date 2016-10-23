@@ -44,9 +44,15 @@ public class Team {
 
     public void setMembers(AwlUser... awlUsers) {
         if (awlUsers.length != getMemberCount()) {
-            throw new IllegalArgumentException("team member length not in [2,3]");
+            throw new IllegalArgumentException("team member length is't " + getMemberCount());
         }
         Arrays.stream(awlUsers).forEach(awlUser -> getMembers().add(awlUser));
+    }
+
+    public void addMember(AwlUser awlUser) {
+        if (getMembers().size() > getMemberCount()) {
+            getMembers().add(awlUser);
+        }
     }
 
     public Date getCreateTime() {

@@ -165,7 +165,7 @@ public class Awl implements Game {
     }
 
     public List<Team> getTeamList() {
-        if(teamList == null){
+        if (teamList == null) {
             teamList = new ArrayList<Team>();
         }
         return teamList;
@@ -186,6 +186,22 @@ public class Awl implements Game {
      */
     public Team getCurrentTeam() {
         return getTeamList().stream().filter(team -> team.getStatus() == Team.STATUS_ING).findFirst().orElse(null);
+    }
+
+    /**
+     * 设置组成员
+     *
+     * @return
+     */
+    public Team initCurrentTeamMembers(int leaderNum, List<Integer> members) {
+        Team team = getCurrentTeam();
+        if (team != null && leaderNum == team.getLeaderNum()) {
+            for (int member : members) {
+                GameUser gameUser = getGameUserFromNum(member);
+                team.addMember((AwlUser) gameUser);
+            }
+        }
+        return team;
     }
 
     public int getCurrentLeaderNum() {

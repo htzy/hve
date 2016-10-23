@@ -7,6 +7,7 @@ import com.huangshihe.game.awl.manage.AwlCache;
 import com.huangshihe.rt.awl.packet.MessagePacket;
 import com.huangshihe.rt.awl.packet.BasePacket;
 import com.huangshihe.rt.awl.packet.TeamPacket;
+import com.huangshihe.rt.awl.packet.VotePacket;
 import com.huangshihe.rt.model.User;
 
 import javax.websocket.*;
@@ -111,9 +112,15 @@ public class AwlCoreSocket {
 //      {"operate":"postTeam/postTask/getTeamInfo/postVote","data":"TeamPacket.class/Task.class/Team.class/Vote.class"}
         try {
             MessagePacket packet = objectMapper.readValue(message, MessagePacket.class);
+            Awl awl = AwlCache.getInstance().get(creatorId);
+            // 提交队伍信息
             if ("postTeam".equals(packet.getOperate())) {
                 TeamPacket teamPacket = packet.getTeamPacket();
-                System.out.println("teamPacket = " + teamPacket);
+                awl.initCurrentTeamMembers(teamPacket.getCreatorNum(),teamPacket.getMembers());
+                broadCast(new BasePacket(awl));
+            }else if ("postVote".equals(packet.getOperate())){
+                // TODO now
+//                VotePacket votePacket=packet.getVote
             }
         } catch (IOException e) {
             e.printStackTrace();
