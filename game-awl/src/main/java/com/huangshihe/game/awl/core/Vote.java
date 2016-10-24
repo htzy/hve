@@ -4,24 +4,23 @@ package com.huangshihe.game.awl.core;
  * Created by Administrator on 2016/7/26.
  */
 public class Vote {
-    private int teamId;
-    private int awlUserId;
+    private int awlUserNum;
     private boolean agree;
 
-    public int getTeamId() {
-        return teamId;
+    public Vote() {
     }
 
-    public void setTeamId(int teamId) {
-        this.teamId = teamId;
+    public Vote(int awlUserNum, boolean agree) {
+        this.awlUserNum = awlUserNum;
+        this.agree = agree;
     }
 
-    public int getAwlUserId() {
-        return awlUserId;
+    public int getAwlUserNum() {
+        return awlUserNum;
     }
 
-    public void setAwlUserId(int awlUserId) {
-        this.awlUserId = awlUserId;
+    public void setAwlUserNum(int awlUserNum) {
+        this.awlUserNum = awlUserNum;
     }
 
     public boolean isAgree() {

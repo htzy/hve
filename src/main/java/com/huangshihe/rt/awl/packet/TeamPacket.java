@@ -18,22 +18,22 @@ public class TeamPacket {
 
     private int memberCount;
 
-    public TeamPacket(){
+    private String info;
+
+    private int status;
+
+    public TeamPacket() {
 
     }
 
     public TeamPacket(Team team) {
         if (team != null) {
             setCreatorNum(team.getLeaderNum());
-            setMemberCount(team.getMemberCount());
+            setMemberCount(team.getRuledMemberCount());
             getMembers().addAll(team.getMembers().stream().map(AwlUser::getNum).collect(Collectors.toList()));
+            setInfo(team.getVoteResult());
+            setStatus(team.getStatus());
         }
-    }
-
-    public TeamPacket(int creatorNum, List<Integer> members) {
-        setCreatorNum(creatorNum);
-        setMembers(members);
-        setMemberCount(Team.memberCount[creatorNum]);
     }
 
     public int getCreatorNum() {
@@ -52,9 +52,6 @@ public class TeamPacket {
     }
 
     public void setMembers(List<Integer> members) {
-        if (members == null) {
-            members = new ArrayList<Integer>();
-        }
         this.members = members;
     }
 
@@ -66,12 +63,30 @@ public class TeamPacket {
         this.memberCount = memberCount;
     }
 
+    public String getInfo() {
+        return info;
+    }
+
+    public void setInfo(String info) {
+        this.info = info;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
     @Override
     public String toString() {
         return "TeamPacket{" +
                 "creatorNum=" + creatorNum +
                 ", members=" + members +
                 ", memberCount=" + memberCount +
+                ", info='" + info + '\'' +
+                ", status=" + status +
                 '}';
     }
 }

@@ -11,6 +11,7 @@ public class MessagePacket {
 //    }
     private String operate;
     private TeamPacket teamPacket;
+    private VotePacket votePacket;
 
     public String getOperate() {
         return operate;
@@ -28,11 +29,20 @@ public class MessagePacket {
         this.teamPacket = teamPacket;
     }
 
+    public VotePacket getVotePacket() {
+        return votePacket;
+    }
+
+    public void setVotePacket(VotePacket votePacket) {
+        this.votePacket = votePacket;
+    }
+
     @Override
     public String toString() {
         return "MessagePacket{" +
                 "operate='" + operate + '\'' +
                 ", teamPacket=" + teamPacket +
+                ", votePacket=" + votePacket +
                 '}';
     }
 }

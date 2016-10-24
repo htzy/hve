@@ -7,6 +7,8 @@ import com.huangshihe.game.core.GameUser;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 /**
  * Created by Administrator on 2016/7/23.
@@ -197,8 +199,7 @@ public class Awl implements Game {
         Team team = getCurrentTeam();
         if (team != null && leaderNum == team.getLeaderNum()) {
             for (int member : members) {
-                GameUser gameUser = getGameUserFromNum(member);
-                team.addMember((AwlUser) gameUser);
+                team.addMember((AwlUser) getGameUserFromNum(member));
             }
         }
         return team;

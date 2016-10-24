@@ -3,6 +3,8 @@ package com.huangshihe.rt.socket;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.huangshihe.game.awl.core.Awl;
 import com.huangshihe.game.awl.core.AwlUser;
+import com.huangshihe.game.awl.core.Team;
+import com.huangshihe.game.awl.core.Vote;
 import com.huangshihe.game.awl.manage.AwlCache;
 import com.huangshihe.rt.awl.packet.MessagePacket;
 import com.huangshihe.rt.awl.packet.BasePacket;
@@ -116,11 +118,19 @@ public class AwlCoreSocket {
             // 提交队伍信息
             if ("postTeam".equals(packet.getOperate())) {
                 TeamPacket teamPacket = packet.getTeamPacket();
-                awl.initCurrentTeamMembers(teamPacket.getCreatorNum(),teamPacket.getMembers());
+                awl.initCurrentTeamMembers(teamPacket.getCreatorNum(), teamPacket.getMembers());
                 broadCast(new BasePacket(awl));
-            }else if ("postVote".equals(packet.getOperate())){
-                // TODO now
-//                VotePacket votePacket=packet.getVote
+            } else if ("postVote".equals(packet.getOperate())) {
+                VotePacket votePacket = packet.getVotePacket();
+                Team team = awl.getCurrentTeam();
+                team.addVote(new Vote(votePacket.getAwlUserNum(), votePacket.isAgree()));
+                if(team.getStatus() == Team.STATUS_SUCCESS){
+                    // TODO
+                }else if (team.getStatus() == Team.STATUS_FAIL){
+                    // TODO
+                }
+                // 当投票结果出来后，发送给客户端，客户端将所有的team和投票删除
+                broadCast(new BasePacket(awl));
             }
         } catch (IOException e) {
             e.printStackTrace();
