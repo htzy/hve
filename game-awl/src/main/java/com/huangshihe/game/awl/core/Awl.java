@@ -195,14 +195,15 @@ public class Awl implements Game {
      *
      * @return
      */
-    public Team initCurrentTeamMembers(int leaderNum, List<Integer> members) {
+    public boolean initCurrentTeamMembers(int leaderNum, List<Integer> members) {
         Team team = getCurrentTeam();
+        boolean result = true;
         if (team != null && leaderNum == team.getLeaderNum()) {
             for (int member : members) {
-                team.addMember((AwlUser) getGameUserFromNum(member));
+                result &= team.addMember((AwlUser) getGameUserFromNum(member));
             }
         }
-        return team;
+        return result;
     }
 
     public int getCurrentLeaderNum() {

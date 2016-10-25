@@ -154,7 +154,6 @@
                 renderWaitUserList($message.userPackets);
                 $introduceInfo.html("游戏等待中，快去呼唤你的小伙伴来加入你创建的游戏吧...<br>等待中的玩家们：");
             } else if ($message.status == 1) {
-                console.info("进入正式游戏，修改界面！");
                 // 生成玩家列表
                 renderAwlUserList($message);
                 renderTeam($message);
@@ -297,18 +296,20 @@
         if (teamPacket == null || teamPacket == "") {
             return;
         }
-        if (teamPacket.members == null || teamPacket.members == "") {
+        // 当队伍信息包中的成员为空时，则需要创建队伍。
+        if (teamPacket.members.length == 0) {
             var leaderPacket = basePacket.userPackets[teamPacket.creatorNum];
             if (basePacket.awlUserId == leaderPacket.userId) {
                 createTeam(basePacket);
             }
         }
-        if (teamPacket.info != null || teamPacket.info != "") {
-            // 当出现队伍结果时，删除队伍
+        // 当出现队伍结果时，删除队伍
+        if (teamPacket.info != null && teamPacket.info != "") {
             var $teamDiv = $("#teamDiv");
-            $teamDiv.children().remove();
-            // TODO 提示用户队伍信息
-//            log("系统提示 > "+teamPacket.info);
+            var $voteDiv = $("#voteDiv");
+            $teamDiv.empty();
+            $voteDiv.empty();
+            log("系统提示 > " + teamPacket.info);
         }
     }
 
@@ -348,7 +349,7 @@
             coreWs.send("{\"operate\":\"postTeam\"," +
                     "\"teamPacket\":{\"creatorNum\":" + currentLeaderNum + ",\"members\":[" + teamMemberNums + "]}}");
             $("#newTeam").find("input").attr("disabled", "disabled");
-            alert("您组建的队伍信息已提交！")
+            alert("您组建的队伍信息已提交！");
         }
     }
 
@@ -358,13 +359,15 @@
             return;
         }
         var teamPacket = basePacket.teamPacket;
-        var title = $("<tr><td>组长为：" + teamPacket.creatorNum + "，队伍成员为：" + teamPacket.members + "</td></tr>");
-        var voteTable = $("<table id='newVote'></table>").append(title);
-        var postBtn = $("<input type='button' onclick='postVote(true)' value='同意'>" +
-                "<input type='button' onclick='postVote(false)' value='反对'>");
+        if (teamPacket.members.length > 0 && teamPacket.status == 0) {
+            var title = $("<tr><td>组长为：" + teamPacket.creatorNum + "，队伍成员为：" + teamPacket.members + "</td></tr>");
+            var voteTable = $("<table id='newVote'></table>").append(title);
+            var postBtn = $("<input type='button' onclick='postVote(true)' value='同意'>" +
+                    "<input type='button' onclick='postVote(false)' value='反对'>");
 
-        voteTable.append(postBtn);
-        $voteDiv.append(voteTable);
+            voteTable.append(postBtn);
+            $voteDiv.append(voteTable);
+        }
     }
 
     function postVote(answer) {

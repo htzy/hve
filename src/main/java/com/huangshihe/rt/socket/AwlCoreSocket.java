@@ -124,12 +124,6 @@ public class AwlCoreSocket {
                 VotePacket votePacket = packet.getVotePacket();
                 Team team = awl.getCurrentTeam();
                 team.addVote(new Vote(votePacket.getAwlUserNum(), votePacket.isAgree()));
-                if(team.getStatus() == Team.STATUS_SUCCESS){
-                    // TODO
-                }else if (team.getStatus() == Team.STATUS_FAIL){
-                    // TODO
-                }
-                // 当投票结果出来后，发送给客户端，客户端将所有的team和投票删除
                 broadCast(new BasePacket(awl));
             }
         } catch (IOException e) {

@@ -1,9 +1,6 @@
 package com.huangshihe.game.awl.core;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -51,10 +48,11 @@ public class Team {
         Arrays.stream(awlUsers).forEach(awlUser -> getMembers().add(awlUser));
     }
 
-    public void addMember(AwlUser awlUser) {
-        if (getMembers().size() > getRuledMemberCount()) {
-            getMembers().add(awlUser);
+    public boolean addMember(AwlUser awlUser) {
+        if (getMembers().size() < getRuledMemberCount()) {
+            return getMembers().add(awlUser);
         }
+        return false;
     }
 
     public Date getCreateTime() {
@@ -89,19 +87,7 @@ public class Team {
         if (getVotes().stream().filter(vote1 -> vote1.getAwlUserNum() == vote.getAwlUserNum()).count() != 0) {
             return false;
         }
-        if (getVotes().size() < 4) {
-            return getVotes().add(vote);
-        } else if (getVotes().size() == 4) {
-            getVotes().add(vote);
-            int agrees = (int) getVotes().stream().filter(Vote::isAgree).count();
-            if (agrees > getVotes().size() - agrees) {
-                setStatus(STATUS_SUCCESS);
-            } else {
-                setStatus(STATUS_FAIL);
-            }
-            return true;
-        }
-        return false;
+        return getVotes().add(vote);
     }
 
     public List<Vote> getDisAgreeVotes() {
@@ -111,18 +97,22 @@ public class Team {
     public List<Vote> getAgreeVotes() {
         return getVotes().stream().filter(Vote::isAgree).collect(Collectors.toList());
     }
+
     public String getVoteResult() {
         StringBuilder builder = new StringBuilder();
         if (getVotes().size() == 5) {
-            builder.append("投票已完成！");
+            builder.append("投票已完成！队长：");
+            builder.append(getLeaderNum());
             List<Vote> agrees = getAgreeVotes();
             List<Vote> disAgrees = getDisAgreeVotes();
             if (agrees.size() > disAgrees.size()) {
-                builder.append("组队成功！赞成的人有：");
-                builder.append(agrees.stream().map(Vote::getAwlUserNum).collect(Collectors.toList()));
+                setStatus(STATUS_SUCCESS);
+                builder.append("，组队成功！赞成的人有：");
+                builder.append(agrees.stream().map(Vote::getAwlUserNum).sorted().collect(Collectors.toList()));
             }else{
-                builder.append("组队失败！反对的人有：");
-                builder.append(disAgrees.stream().map(Vote::getAwlUserNum).collect(Collectors.toList()));
+                setStatus(STATUS_FAIL);
+                builder.append("，组队失败！反对的人有：");
+                builder.append(disAgrees.stream().map(Vote::getAwlUserNum).sorted().collect(Collectors.toList()));
             }
         }
         return builder.toString();

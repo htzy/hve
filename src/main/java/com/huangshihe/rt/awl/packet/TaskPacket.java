@@ -9,18 +9,26 @@ public class TaskPacket {
     /**
      * 任务创建者id
      */
-    private int creatorId;
+    private int creatorNum;
     /**
      * 任务回复项大小
      */
     private int itemSize;
 
-    public int getCreatorId() {
-        return creatorId;
+    public TaskPacket() {
     }
 
-    public void setCreatorId(int creatorId) {
-        this.creatorId = creatorId;
+    public TaskPacket(int creatorNum, int itemSize) {
+        this.creatorNum = creatorNum;
+        this.itemSize = itemSize;
+    }
+
+    public int getCreatorNum() {
+        return creatorNum;
+    }
+
+    public void setCreatorNum(int creatorNum) {
+        this.creatorNum = creatorNum;
     }
 
     public int getItemSize() {
@@ -36,7 +44,7 @@ public class TaskPacket {
     @Override
     public String toString() {
         return "TaskPacket{" +
-                "creatorId=" + getCreatorId() +
+                "creatorNum=" + getCreatorNum() +
                 ", itemSize=" + getItemSize() +
                 '}';
     }
