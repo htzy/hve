@@ -22,6 +22,9 @@ public class TeamPacket {
 
     private int status;
 
+    // TODO now???
+    private TaskPacket taskPacket;
+
     public TeamPacket() {
 
     }
@@ -79,6 +82,14 @@ public class TeamPacket {
         this.status = status;
     }
 
+    public TaskPacket getTaskPacket() {
+        return taskPacket;
+    }
+
+    public void setTaskPacket(TaskPacket taskPacket) {
+        this.taskPacket = taskPacket;
+    }
+
     @Override
     public String toString() {
         return "TeamPacket{" +
@@ -87,6 +98,7 @@ public class TeamPacket {
                 ", memberCount=" + memberCount +
                 ", info='" + info + '\'' +
                 ", status=" + status +
+                ", taskPacket=" + taskPacket +
                 '}';
     }
 }

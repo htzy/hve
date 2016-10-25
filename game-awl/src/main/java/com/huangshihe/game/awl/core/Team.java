@@ -1,6 +1,9 @@
 package com.huangshihe.game.awl.core;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -12,6 +15,7 @@ public class Team {
     private Date createTime;
     private int status;
     private List<Vote> votes;
+    private Task task;
 
     public Team(int leaderNum, AwlUser... awlUsers) {
         setLeaderNum(leaderNum);
@@ -82,12 +86,12 @@ public class Team {
         return votes;
     }
 
-    public boolean addVote(Vote vote) {
+    public boolean addVote(int awlUserNum, boolean answer) {
         // 如果以前投过票，则不允许再次投票
-        if (getVotes().stream().filter(vote1 -> vote1.getAwlUserNum() == vote.getAwlUserNum()).count() != 0) {
+        if (getVotes().stream().filter(vote1 -> vote1.getAwlUserNum() == awlUserNum).count() != 0) {
             return false;
         }
-        return getVotes().add(vote);
+        return getVotes().add(new Vote(awlUserNum,answer));
     }
 
     public List<Vote> getDisAgreeVotes() {
@@ -107,9 +111,10 @@ public class Team {
             List<Vote> disAgrees = getDisAgreeVotes();
             if (agrees.size() > disAgrees.size()) {
                 setStatus(STATUS_SUCCESS);
+                setTask(new Task());
                 builder.append("，组队成功！赞成的人有：");
                 builder.append(agrees.stream().map(Vote::getAwlUserNum).sorted().collect(Collectors.toList()));
-            }else{
+            } else {
                 setStatus(STATUS_FAIL);
                 builder.append("，组队失败！反对的人有：");
                 builder.append(disAgrees.stream().map(Vote::getAwlUserNum).sorted().collect(Collectors.toList()));
@@ -118,14 +123,22 @@ public class Team {
         return builder.toString();
     }
 
-    // 失败和成功的队伍都属于过期的队伍
+    public Task getTask() {
+        return task;
+    }
+
+    public void setTask(Task task) {
+        this.task = task;
+    }
+
+    // 失败和成功的队伍都属于已创建完成的队伍
     /**
-     * 组建失败的队伍
+     * 组建队伍：失败
      */
     public static final int STATUS_FAIL = -1;
 
     /**
-     * 组建成功的队伍
+     * 组建队伍：成功
      */
     public static final int STATUS_SUCCESS = 1;
 

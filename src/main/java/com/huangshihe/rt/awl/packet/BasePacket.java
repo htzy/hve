@@ -1,6 +1,7 @@
 package com.huangshihe.rt.awl.packet;
 
 import com.huangshihe.game.awl.core.Awl;
+import com.huangshihe.game.awl.core.Task;
 import com.huangshihe.game.awl.core.Team;
 import com.huangshihe.game.core.GameUser;
 
@@ -78,13 +79,10 @@ public class BasePacket {
         Team team = awl.getCurrentTeam();
         if (team != null) {
             setTeamPacket(new TeamPacket(team));
-//            // 当投票结果出来后，发送给客户端，客户端将所有的team和投票删除
-//            if (team.getStatus() == Team.STATUS_SUCCESS) {
-//                // 如果队伍组建成功
-//                setTaskPacket(new TaskPacket());
-//            } else if (team.getStatus() == Team.STATUS_FAIL) {
-//                // TODO 如果队伍组建失败，将进行下一轮选队长
-//            }
+        }
+        Task task = awl.getCurrentTask();
+        if (task != null) {
+            setTaskPacket(new TaskPacket(task));
         }
 //        for (GameUser gameUser : awl.getGamers()){
 //            getUserPackets().add(new UserPacket(gameUser));

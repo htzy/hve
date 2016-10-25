@@ -113,6 +113,7 @@
     var chatWs;
     var coreWs;
     var selfNum;
+    var selfType;
     function init() {
         // 聊天socket
         chatWs = new WebSocket("ws://" + document.location.host + "${basePath}/ws/awl/chat/${loginUser.id}");
@@ -158,7 +159,7 @@
                 renderAwlUserList($message);
                 renderTeam($message);
                 renderVote($message);
-//                renderTask($message);
+                renderTask($message);
             } else if ($message.status == 2) {
                 console.info("游戏结束！");
                 alert("欢迎再来...see you~");
@@ -231,6 +232,7 @@
             // 当显示自己身份时
             if (userPacket.userId == awlUserId) {
                 selfNum = userPacket.identityNum;
+                selfType = userPacket.identityType;
                 $awlUserInfo.html(userPacket.identityInfo);
                 // 好人1，坏人2
                 if (userPacket.identityType == 1) {
@@ -303,12 +305,9 @@
                 createTeam(basePacket);
             }
         }
-        // 当出现队伍结果时，删除队伍
+        // 当出现队伍结果时，说明该队伍组建完成，删除该组的显示
         if (teamPacket.info != null && teamPacket.info != "") {
-            var $teamDiv = $("#teamDiv");
-            var $voteDiv = $("#voteDiv");
-            $teamDiv.empty();
-            $voteDiv.empty();
+            deleteAll();
             log("系统提示 > " + teamPacket.info);
         }
     }
@@ -375,6 +374,69 @@
                 "\"votePacket\":{\"awlUserNum\":" + selfNum + ",\"agree\":\"" + answer + "\"}}");
         $("#newVote").find("input").attr("disabled", "disabled");
         alert("您的投票信息已提交！");
+    }
+
+    function renderTask(basePacket) {
+        var teamPacket = basePacket.teamPacket;
+        if (teamPacket.status == 1) {
+            // 如果队伍组建成功，给队员创建任务，好人只能创建1个选项，坏人可以创建两个选项
+            createTask(basePacket);
+        } else if (teamPacket.status == -1) {
+            // 如果队伍组建失败，则取消创建任务，并向服务器发送信息，要求进行下一轮队长选队员。
+            coreWs.send("{\"operate\":\"nextTeam\"," +
+                    "\"data\":\"awlUserNum\":" + selfNum + "}");
+        }
+        // 如果接收到任务结果，则显示任务结果，并要求进行下一轮队长选队员。
+        var taskPacket = basePacket.taskPacket;
+        if (taskPacket != null && taskPacket != "") {
+            if (taskPacket.result) {
+                log("系统提示 > 由" + taskPacket.members + "所做的任务成功！");
+            } else {
+                log("系统提示 > 由" + taskPacket.members + "所做的任务失败！");
+            }
+            coreWs.send("{\"operate\":\"nextTeam\"," +
+                    "\"data\":\"awlUserNum\":" + selfNum + "}");
+        }
+    }
+
+    function createTask(basePacket) {
+        var $taskDiv = $("#taskDiv");
+        if ($taskDiv.find("tr").length > 0) {
+            return;
+        }
+        var teamPacket = basePacket.teamPacket;
+        var members = teamPacket.members;
+        var title = $("<tr><td>您有一个任务需要执行</td><tr>");
+        var taskTable = $("<table id='newTask'></table>").append(title);
+        // 找到所有的组员进行任务
+        $.each(members, function (i) {
+            if (members[i] == selfNum) {
+                // 如果是好人1，则只能执行√；坏人2可以执行√和×
+                if (selfType == 1) {
+                    taskTable.append($("<input type='button' onclick='postTask(" + true + ")' value='√'>"));
+                } else if (selfType == 2) {
+                    taskTable.append($("<input type='button' onclick='postTask(" + true + ")' value='√'>" +
+                            "<input type='button' onclick='postTask(" + false + ")' value='×'>"))
+                }
+            }
+        });
+
+        $taskDiv.append(taskTable);
+    }
+
+    function postTask(answer) {
+        coreWs.send("{\"operate\":\"postTask\"," +
+                "\"votePacket\":{\"awlUserNum\":" + selfNum + ",\"agree\":\"" + answer + "\"}}");
+//        $("#newTask").find("input").attr("disabled", "disabled");
+        alert("您做的任务已提交！");
+        $("#newTask").empty();
+    }
+
+    function deleteAll() {
+        var $teamDiv = $("#teamDiv");
+        var $voteDiv = $("#voteDiv");
+        $teamDiv.empty();
+        $voteDiv.empty();
     }
 
     //////////////////////////////////////////////

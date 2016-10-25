@@ -7,7 +7,6 @@ import com.huangshihe.game.core.GameUser;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 /**
@@ -182,12 +181,27 @@ public class Awl implements Game {
     }
 
     /**
-     * 获得当前的队伍（状态为：创建中，其余状态：成功，失败等均为过时状态）
+     * 获得当前的队伍（状态为：创建中，其余状态：成功，失败等均为创建完成状态）
      *
      * @return
      */
     public Team getCurrentTeam() {
         return getTeamList().stream().filter(team -> team.getStatus() == Team.STATUS_ING).findFirst().orElse(null);
+    }
+
+    /**
+     * 获得当前的任务
+     * 从teamList从后往前找(最新的)，只有当队伍组建成功，而且队伍的领导为当前领导时，才是当前的任务
+     *
+     * @return
+     */
+    public Task getCurrentTask() {
+        List<Team> list = getTeamList().stream().filter(team -> team.getStatus() == Team.STATUS_SUCCESS
+                && team.getLeaderNum() == getCurrentLeaderNum()).collect(Collectors.toList());
+        if (list != null && list.size() != 0) {
+            return list.get(list.size() - 1).getTask();
+        }
+        return null;
     }
 
     /**
@@ -212,6 +226,11 @@ public class Awl implements Game {
 
     public void setCurrentLeaderNum(int currentLeaderNum) {
         this.currentLeaderNum = currentLeaderNum;
+    }
+
+    public int updateCurrentLeaderNum() {
+        currentLeaderNum = ((currentLeaderNum + 1) % requireGamerNum);
+        return currentLeaderNum;
     }
 
     public int getTotalTaskSuccessCount() {

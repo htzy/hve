@@ -1,17 +1,37 @@
 package com.huangshihe.game.awl.core;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by Administrator on 2016/7/26.
  */
 public class Task {
+    private List<Vote> votes;
 
-    /**
-     * 好人任务可选项的大小，1即只允许选择“勾”
-     */
-    public final static int GOOD_ITEM_SIZE = 1;
+    public List<Vote> getVotes() {
+        if(votes == null){
+            votes = new ArrayList<Vote>();
+        }
+        return votes;
+    }
 
-    /**
-     * 坏人任务可选项的大小，2即可选择“勾”或“叉”
-     */
-    public final static int BAD_ITEM_SIZE = 2;
+    public void setVotes(List<Vote> votes) {
+        this.votes = votes;
+    }
+
+    public boolean add(int awlUserNum, boolean answer) {
+        // 以前做过该任务时，不允许再做
+        if (getVotes().stream().filter(vote -> vote.getAwlUserNum() == awlUserNum).count() != 0) {
+            return false;
+        }
+        return getVotes().add(new Vote(awlUserNum,answer));
+    }
+
+    @Override
+    public String toString() {
+        return "Task{" +
+                "votes=" + votes +
+                '}';
+    }
 }

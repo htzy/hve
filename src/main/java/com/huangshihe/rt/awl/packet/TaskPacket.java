@@ -2,50 +2,50 @@ package com.huangshihe.rt.awl.packet;
 
 import com.huangshihe.game.awl.core.Task;
 
+import java.util.List;
+
 /**
  * Created by Administrator on 2016/8/15.
  */
 public class TaskPacket {
-    /**
-     * 任务创建者id
-     */
-    private int creatorNum;
-    /**
-     * 任务回复项大小
-     */
-    private int itemSize;
+
+    private List<Integer> members;
+
+    private boolean result;
 
     public TaskPacket() {
     }
 
-    public TaskPacket(int creatorNum, int itemSize) {
-        this.creatorNum = creatorNum;
-        this.itemSize = itemSize;
+    public TaskPacket(Task task){
+
     }
 
-    public int getCreatorNum() {
-        return creatorNum;
+    public TaskPacket(List<Integer> members, boolean result) {
+        this.members = members;
+        this.result = result;
     }
 
-    public void setCreatorNum(int creatorNum) {
-        this.creatorNum = creatorNum;
+    public List<Integer> getMembers() {
+        return members;
     }
 
-    public int getItemSize() {
-        return itemSize;
+    public void setMembers(List<Integer> members) {
+        this.members = members;
     }
 
-    public void setItemSize(int itemSize) {
-        if(itemSize == Task.BAD_ITEM_SIZE || itemSize == Task.GOOD_ITEM_SIZE){
-            this.itemSize = itemSize;
-        }
+    public boolean isResult() {
+        return result;
+    }
+
+    public void setResult(boolean result) {
+        this.result = result;
     }
 
     @Override
     public String toString() {
         return "TaskPacket{" +
-                "creatorNum=" + getCreatorNum() +
-                ", itemSize=" + getItemSize() +
+                "members=" + members +
+                ", result=" + result +
                 '}';
     }
 }
