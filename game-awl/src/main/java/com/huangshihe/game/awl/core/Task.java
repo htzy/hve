@@ -8,10 +8,15 @@ import java.util.List;
  */
 public class Task {
     private List<Vote> votes;
+    private int needs;
+
+    public Task(int needs) {
+        this.needs = needs;
+    }
 
     public List<Vote> getVotes() {
-        if(votes == null){
-            votes = new ArrayList<Vote>();
+        if (votes == null) {
+            votes = new ArrayList<Vote>(needs + 1);
         }
         return votes;
     }
@@ -25,8 +30,11 @@ public class Task {
         if (getVotes().stream().filter(vote -> vote.getAwlUserNum() == awlUserNum).count() != 0) {
             return false;
         }
-        return getVotes().add(new Vote(awlUserNum,answer));
+        return getVotes().add(new Vote(awlUserNum, answer));
     }
+
+    // TODO now 判断任务是否已经做完，即是否已经达到needs需要的票数
+    // TODO 返回给AwlCoreSocket，当任务做完怎么办？没有做完则继续等待
 
     @Override
     public String toString() {

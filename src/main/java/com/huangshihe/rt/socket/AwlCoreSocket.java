@@ -126,7 +126,7 @@ public class AwlCoreSocket {
                 team.addVote(votePacket.getAwlUserNum(), votePacket.isAgree());
                 broadCast(new BasePacket(awl));
             } else if ("nextTeam".equals(packet.getOperate())) {
-                // TODO 只有接收到当前队长发送该包时，才更新队长
+                // TODO next 只有接收到当前队长发送该包时，才更新队长
                 if (awl.getCurrentLeaderNum() == packet.getDataToInt()) {
                     awl.updateCurrentLeaderNum();
                     AwlCoreSocket.broadCast(new BasePacket(awl));
@@ -135,7 +135,9 @@ public class AwlCoreSocket {
                 // TODO 提交任务，需要校验？
                 VotePacket votePacket = packet.getVotePacket();
                 awl.getCurrentTask().add(votePacket.getAwlUserNum(), votePacket.isAgree());
-                // TODO now now 如何检查任务是否做完？如何获得当前正在进行中的队伍？增加状态？
+                // 当前需要进行的任务数与当前队伍中的members数一致
+                // 当已进行的任务数没有达到当前队伍中的members数时，说明还需继续等待客户端发送“postTask”
+                // TODO now now 如何检查任务是否做完？
             }
         } catch (IOException e) {
             e.printStackTrace();

@@ -49,6 +49,7 @@
 </div>
 <div class="section">
     <div class="container">
+        hello, ${loginUser.username} &nbsp;
         <c:if test="${loginUser.id == awl.creatorId}">
             <a class="btn btn-danger" href="javascript:void(0);" onclick="quitGame()">结束这一局</a>
         </c:if>
@@ -378,17 +379,18 @@
 
     function renderTask(basePacket) {
         var teamPacket = basePacket.teamPacket;
-        if (teamPacket.status == 1) {
+        if (teamPacket.status == 2) {
+            // TODO now 已能成功创建task，但是postTask未通过测试
             // 如果队伍组建成功，给队员创建任务，好人只能创建1个选项，坏人可以创建两个选项
             createTask(basePacket);
         } else if (teamPacket.status == -1) {
+            // TODO next
             // 如果队伍组建失败，则取消创建任务，并向服务器发送信息，要求进行下一轮队长选队员。
             coreWs.send("{\"operate\":\"nextTeam\"," +
                     "\"data\":\"awlUserNum\":" + selfNum + "}");
-        }
-        // 如果接收到任务结果，则显示任务结果，并要求进行下一轮队长选队员。
-        var taskPacket = basePacket.taskPacket;
-        if (taskPacket != null && taskPacket != "") {
+        }else if (teamPacket.status == 1){
+            // 如果接收到任务结果（即组队成功，但是已过时），则显示任务结果，并要求进行下一轮队长选队员。
+            var taskPacket = basePacket.teamPacket.taskPacket;
             if (taskPacket.result) {
                 log("系统提示 > 由" + taskPacket.members + "所做的任务成功！");
             } else {
@@ -406,11 +408,11 @@
         }
         var teamPacket = basePacket.teamPacket;
         var members = teamPacket.members;
-        var title = $("<tr><td>您有一个任务需要执行</td><tr>");
-        var taskTable = $("<table id='newTask'></table>").append(title);
         // 找到所有的组员进行任务
         $.each(members, function (i) {
             if (members[i] == selfNum) {
+                var title = $("<tr><td>您有一个任务需要执行</td><tr>");
+                var taskTable = $("<table id='newTask'></table>").append(title);
                 // 如果是好人1，则只能执行√；坏人2可以执行√和×
                 if (selfType == 1) {
                     taskTable.append($("<input type='button' onclick='postTask(" + true + ")' value='√'>"));
@@ -418,10 +420,9 @@
                     taskTable.append($("<input type='button' onclick='postTask(" + true + ")' value='√'>" +
                             "<input type='button' onclick='postTask(" + false + ")' value='×'>"))
                 }
+                $taskDiv.append(taskTable);
             }
         });
-
-        $taskDiv.append(taskTable);
     }
 
     function postTask(answer) {

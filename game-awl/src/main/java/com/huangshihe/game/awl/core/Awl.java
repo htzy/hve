@@ -177,29 +177,29 @@ public class Awl implements Game {
     }
 
     public boolean createTeam(Team team) {
+        System.out.println("team.getVoteResult() = " + team.getVoteResult());
         return getTeamList().add(team);
     }
 
     /**
-     * 获得当前的队伍（状态为：创建中，其余状态：成功，失败等均为创建完成状态）
+     * 获得当前的队伍（状态为：创建中，其余状态："成功"和"失败"均为创建完成状态）
      *
      * @return
      */
     public Team getCurrentTeam() {
-        return getTeamList().stream().filter(team -> team.getStatus() == Team.STATUS_ING).findFirst().orElse(null);
+        return getTeamList().stream().filter(team -> team.getStatus() == Team.STATUS_CREATING
+                || team.getStatus() == Team.STATUS_ACTIVE).findFirst().orElse(null);
     }
 
     /**
      * 获得当前的任务
-     * 从teamList从后往前找(最新的)，只有当队伍组建成功，而且队伍的领导为当前领导时，才是当前的任务
      *
      * @return
      */
     public Task getCurrentTask() {
-        List<Team> list = getTeamList().stream().filter(team -> team.getStatus() == Team.STATUS_SUCCESS
-                && team.getLeaderNum() == getCurrentLeaderNum()).collect(Collectors.toList());
-        if (list != null && list.size() != 0) {
-            return list.get(list.size() - 1).getTask();
+        Team team = getCurrentTeam();
+        if (team != null) {
+            return team.getTask();
         }
         return null;
     }

@@ -62,11 +62,6 @@ public class BasePacket {
     private VotePacket votePacket;
 
     /**
-     * 任务信息包
-     */
-    private TaskPacket taskPacket;
-
-    /**
      * 对于该awl对象的所有玩家生效的基本信息包
      *
      * @param awl
@@ -79,10 +74,6 @@ public class BasePacket {
         Team team = awl.getCurrentTeam();
         if (team != null) {
             setTeamPacket(new TeamPacket(team));
-        }
-        Task task = awl.getCurrentTask();
-        if (task != null) {
-            setTaskPacket(new TaskPacket(task));
         }
 //        for (GameUser gameUser : awl.getGamers()){
 //            getUserPackets().add(new UserPacket(gameUser));
@@ -178,14 +169,6 @@ public class BasePacket {
         this.votePacket = votePacket;
     }
 
-    public TaskPacket getTaskPacket() {
-        return taskPacket;
-    }
-
-    public void setTaskPacket(TaskPacket taskPacket) {
-        this.taskPacket = taskPacket;
-    }
-
     @Override
     public String toString() {
         return "BasePacket{" +
@@ -198,7 +181,6 @@ public class BasePacket {
                 ", userPackets=" + userPackets +
                 ", teamPacket=" + teamPacket +
                 ", votePacket=" + votePacket +
-                ", taskPacket=" + taskPacket +
                 '}';
     }
 }

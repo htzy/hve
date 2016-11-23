@@ -17,7 +17,7 @@ public class TaskPacket {
     }
 
     public TaskPacket(Task task){
-
+        // TODO next task??
     }
 
     public TaskPacket(List<Integer> members, boolean result) {

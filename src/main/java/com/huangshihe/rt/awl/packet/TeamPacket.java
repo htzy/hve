@@ -22,7 +22,6 @@ public class TeamPacket {
 
     private int status;
 
-    // TODO now???
     private TaskPacket taskPacket;
 
     public TeamPacket() {
@@ -36,6 +35,7 @@ public class TeamPacket {
             getMembers().addAll(team.getMembers().stream().map(AwlUser::getNum).collect(Collectors.toList()));
             setInfo(team.getVoteResult());
             setStatus(team.getStatus());
+            setTaskPacket(new TaskPacket(team.getTask()));
         }
     }
 

@@ -16,18 +16,21 @@ public class Team {
     private int status;
     private List<Vote> votes;
     private Task task;
+    private StringBuilder info;
 
     public Team(int leaderNum, AwlUser... awlUsers) {
         setLeaderNum(leaderNum);
         setMembers(awlUsers);
-        setStatus(STATUS_ING);
+        setStatus(STATUS_CREATING);
         setCreateTime(new Date());
+        info = new StringBuilder();
     }
 
     public Team(int leaderNum) {
         setLeaderNum(leaderNum);
-        setStatus(STATUS_ING);
+        setStatus(STATUS_CREATING);
         setCreateTime(new Date());
+        info = new StringBuilder();
     }
 
     public int getLeaderNum() {
@@ -91,7 +94,7 @@ public class Team {
         if (getVotes().stream().filter(vote1 -> vote1.getAwlUserNum() == awlUserNum).count() != 0) {
             return false;
         }
-        return getVotes().add(new Vote(awlUserNum,answer));
+        return getVotes().add(new Vote(awlUserNum, answer));
     }
 
     public List<Vote> getDisAgreeVotes() {
@@ -103,24 +106,26 @@ public class Team {
     }
 
     public String getVoteResult() {
-        StringBuilder builder = new StringBuilder();
-        if (getVotes().size() == 5) {
-            builder.append("投票已完成！队长：");
-            builder.append(getLeaderNum());
+        // team的信息info只需要生成一次即可
+        if (getVotes().size() == 5 && getStatus() == STATUS_CREATING) {
+            info.append("投票已完成！队长：");
+            info.append(getLeaderNum());
             List<Vote> agrees = getAgreeVotes();
             List<Vote> disAgrees = getDisAgreeVotes();
             if (agrees.size() > disAgrees.size()) {
-                setStatus(STATUS_SUCCESS);
-                setTask(new Task());
-                builder.append("，组队成功！赞成的人有：");
-                builder.append(agrees.stream().map(Vote::getAwlUserNum).sorted().collect(Collectors.toList()));
+                // 将team状态改为活动中，为接下来的task服务
+                setStatus(STATUS_ACTIVE);
+                // 为该team生成task
+                setTask(new Task(getRuledMemberCount()));
+                info.append("，组队成功！赞成的人有：");
+                info.append(agrees.stream().map(Vote::getAwlUserNum).sorted().collect(Collectors.toList()));
             } else {
                 setStatus(STATUS_FAIL);
-                builder.append("，组队失败！反对的人有：");
-                builder.append(disAgrees.stream().map(Vote::getAwlUserNum).sorted().collect(Collectors.toList()));
+                info.append("，组队失败！反对的人有：");
+                info.append(disAgrees.stream().map(Vote::getAwlUserNum).sorted().collect(Collectors.toList()));
             }
         }
-        return builder.toString();
+        return info.toString();
     }
 
     public Task getTask() {
@@ -131,24 +136,31 @@ public class Team {
         this.task = task;
     }
 
+
     // 失败和成功的队伍都属于已创建完成的队伍
     /**
-     * 组建队伍：失败
+     * 组建队伍：失败，属于过时状态
      */
     public static final int STATUS_FAIL = -1;
 
     /**
-     * 组建队伍：成功
+     * 组建队伍：成功，属于过时状态（成功即：组队队伍成功，包含任务Task成功和失败两种状态）
      */
     public static final int STATUS_SUCCESS = 1;
 
     /**
+     * 组建队伍成功，同时该队伍还在继续工作
+     */
+    public static final int STATUS_ACTIVE = 2;
+
+    /**
      * 创建中的队伍
      */
-    public static final int STATUS_ING = 0;
+    public static final int STATUS_CREATING = 0;
 
     /**
      * 规定的队伍成员人数
      */
     private static int ruledTeamMemberCount[] = {2, 3, 2, 3, 3};
+
 }
