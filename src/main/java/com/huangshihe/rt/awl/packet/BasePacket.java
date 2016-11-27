@@ -83,6 +83,17 @@ public class BasePacket {
         getUserPackets().sort(Comparator.comparing(UserPacket::getIdentityNum));
     }
 
+    public BasePacket(Awl awl, Team lastTeam){
+        setCreatorId(awl.getCreatorId());
+        setSuccessTimes(awl.getTotalTaskSuccessCount());
+        setFailTimes(awl.getTotalTaskFailCount());
+        setStatus(awl.getStatus());
+        setTeamPacket(new TeamPacket(lastTeam));
+        getUserPackets().addAll(awl.getGamers().stream().map(UserPacket::new)
+                .collect(Collectors.toList()));
+        getUserPackets().sort(Comparator.comparing(UserPacket::getIdentityNum));
+    }
+
     /**
      * 对于该玩家生效的基本信息包
      *

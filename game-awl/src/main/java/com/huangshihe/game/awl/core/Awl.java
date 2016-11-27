@@ -66,7 +66,7 @@ public class Awl implements Game {
         totalTaskFailCount = 0;
         // 游戏开始
         status = STATUS_ING;
-        createTeam(new Team(currentLeaderNum));
+        createTeam();
         return true;
     }
 
@@ -176,9 +176,12 @@ public class Awl implements Game {
         this.teamList = teamList;
     }
 
-    public boolean createTeam(Team team) {
-        System.out.println("team.getVoteResult() = " + team.getVoteResult());
-        return getTeamList().add(team);
+    public boolean createTeam() {
+        if (getCurrentTeam() == null) {
+            Team team = new Team(currentLeaderNum);
+            return getTeamList().add(team);
+        }
+        return false;
     }
 
     /**

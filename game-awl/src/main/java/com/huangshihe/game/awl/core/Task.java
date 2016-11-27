@@ -33,8 +33,22 @@ public class Task {
         return getVotes().add(new Vote(awlUserNum, answer));
     }
 
-    // TODO now 判断任务是否已经做完，即是否已经达到needs需要的票数
-    // TODO 返回给AwlCoreSocket，当任务做完怎么办？没有做完则继续等待
+    /**
+     * 判断任务是否已经做完，即是否已经达到needs需要的票数
+     * @return
+     */
+    public boolean isDone() {
+        return getVotes().size() == needs;
+    }
+
+    /**
+     * 返回任务是否成功，当出现'×'(false)，即为失败
+     * @return
+     */
+    public boolean isSuccess() {
+        return getVotes().stream().filter(Vote::isAgree).count() == needs;
+    }
+
 
     @Override
     public String toString() {

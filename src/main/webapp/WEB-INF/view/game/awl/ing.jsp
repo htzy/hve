@@ -307,7 +307,7 @@
             }
         }
         // 当出现队伍结果时，说明该队伍组建完成，删除该组的显示
-        if (teamPacket.info != null && teamPacket.info != "") {
+        if (teamPacket.info != null && teamPacket.info != "" && (teamPacket.status == 2 || teamPacket.status == -1)) {
             deleteAll();
             log("系统提示 > " + teamPacket.info);
         }
@@ -364,7 +364,6 @@
             var voteTable = $("<table id='newVote'></table>").append(title);
             var postBtn = $("<input type='button' onclick='postVote(true)' value='同意'>" +
                     "<input type='button' onclick='postVote(false)' value='反对'>");
-
             voteTable.append(postBtn);
             $voteDiv.append(voteTable);
         }
@@ -380,24 +379,25 @@
     function renderTask(basePacket) {
         var teamPacket = basePacket.teamPacket;
         if (teamPacket.status == 2) {
-            // TODO now 已能成功创建task，但是postTask未通过测试
             // 如果队伍组建成功，给队员创建任务，好人只能创建1个选项，坏人可以创建两个选项
             createTask(basePacket);
         } else if (teamPacket.status == -1) {
             // TODO next
             // 如果队伍组建失败，则取消创建任务，并向服务器发送信息，要求进行下一轮队长选队员。
-            coreWs.send("{\"operate\":\"nextTeam\"," +
-                    "\"data\":\"awlUserNum\":" + selfNum + "}");
+            if (teamPacket.creatorNum == selfNum){
+                coreWs.send("{\"operate\":\"nextTeam\", \"data\":" + selfNum + "}");
+            }
         }else if (teamPacket.status == 1){
             // 如果接收到任务结果（即组队成功，但是已过时），则显示任务结果，并要求进行下一轮队长选队员。
-            var taskPacket = basePacket.teamPacket.taskPacket;
+            var taskPacket = teamPacket.taskPacket;
             if (taskPacket.result) {
                 log("系统提示 > 由" + taskPacket.members + "所做的任务成功！");
             } else {
                 log("系统提示 > 由" + taskPacket.members + "所做的任务失败！");
             }
-            coreWs.send("{\"operate\":\"nextTeam\"," +
-                    "\"data\":\"awlUserNum\":" + selfNum + "}");
+            if (teamPacket.creatorNum == selfNum){
+                coreWs.send("{\"operate\":\"nextTeam\", \"data\":" + selfNum + "}");
+            }
         }
     }
 
@@ -430,7 +430,7 @@
                 "\"votePacket\":{\"awlUserNum\":" + selfNum + ",\"agree\":\"" + answer + "\"}}");
 //        $("#newTask").find("input").attr("disabled", "disabled");
         alert("您做的任务已提交！");
-        $("#newTask").empty();
+        $("#taskDiv").empty();
     }
 
     function deleteAll() {
