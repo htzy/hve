@@ -7,6 +7,7 @@ import com.huangshihe.game.core.GameUser;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by Administrator on 2016/7/23.
@@ -65,6 +66,7 @@ public class Awl implements Game {
         totalTaskFailCount = 0;
         // 游戏开始
         status = STATUS_ING;
+        createTeam();
         return true;
     }
 
@@ -164,6 +166,9 @@ public class Awl implements Game {
     }
 
     public List<Team> getTeamList() {
+        if (teamList == null) {
+            teamList = new ArrayList<Team>();
+        }
         return teamList;
     }
 
@@ -171,8 +176,51 @@ public class Awl implements Game {
         this.teamList = teamList;
     }
 
-    public boolean createTeam(Team team) {
-        return getTeamList().add(team);
+    public boolean createTeam() {
+        if (getCurrentTeam() == null) {
+            Team team = new Team(currentLeaderNum);
+            return getTeamList().add(team);
+        }
+        return false;
+    }
+
+    /**
+     * 获得当前的队伍（状态为：创建中，其余状态："成功"和"失败"均为创建完成状态）
+     *
+     * @return
+     */
+    public Team getCurrentTeam() {
+        return getTeamList().stream().filter(team -> team.getStatus() == Team.STATUS_CREATING
+                || team.getStatus() == Team.STATUS_ACTIVE).findFirst().orElse(null);
+    }
+
+    /**
+     * 获得当前的任务
+     *
+     * @return
+     */
+    public Task getCurrentTask() {
+        Team team = getCurrentTeam();
+        if (team != null) {
+            return team.getTask();
+        }
+        return null;
+    }
+
+    /**
+     * 设置组成员
+     *
+     * @return
+     */
+    public boolean initCurrentTeamMembers(int leaderNum, List<Integer> members) {
+        Team team = getCurrentTeam();
+        boolean result = true;
+        if (team != null && leaderNum == team.getLeaderNum()) {
+            for (int member : members) {
+                result &= team.addMember((AwlUser) getGameUserFromNum(member));
+            }
+        }
+        return result;
     }
 
     public int getCurrentLeaderNum() {
@@ -181,6 +229,11 @@ public class Awl implements Game {
 
     public void setCurrentLeaderNum(int currentLeaderNum) {
         this.currentLeaderNum = currentLeaderNum;
+    }
+
+    public int updateCurrentLeaderNum() {
+        currentLeaderNum = ((currentLeaderNum + 1) % requireGamerNum);
+        return currentLeaderNum;
     }
 
     public int getTotalTaskSuccessCount() {

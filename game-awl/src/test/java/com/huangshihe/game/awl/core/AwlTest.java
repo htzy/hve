@@ -14,40 +14,13 @@ public class AwlTest extends TestCase {
         AwlCache.getInstance().create(1, "111");
     }
 
-    public void testGetId() throws Exception {
-
-    }
-
-    public void testSetId() throws Exception {
-
-    }
-
-    public void testGetCreatorId() throws Exception {
-
-    }
-
-    public void testSetCreatorId() throws Exception {
-
-    }
-
-    public void testGetCreatorName() throws Exception {
-
-    }
-
-    public void testSetCreatorName() throws Exception {
-
-    }
-
-    public void testGetCreateTime() throws Exception {
-
-    }
-
-    public void testSetCreateTime() throws Exception {
-
-    }
-
-    public void testGetGamers() throws Exception {
-
+    public void testInitCurrentTeamMembers() throws Exception {
+        boolean flag = false;
+        flag&=true;
+        assertEquals(false, flag);
+        flag=true;
+        flag&=false;
+        assertEquals(false, flag);
     }
 
     public void testAdd() throws Exception {
@@ -80,54 +53,6 @@ public class AwlTest extends TestCase {
         assertEquals(5, awl.getGamers().size());
 
         assertEquals(1, awl.getGamer(1).getUserId());
-    }
-
-    public void testRemove() throws Exception {
-
-    }
-
-    public void testGetGamer() throws Exception {
-
-    }
-
-    public void testGetRequireGamerNum() throws Exception {
-
-    }
-
-    public void testSetRequireGamerNum() throws Exception {
-
-    }
-
-    public void testGetStatus() throws Exception {
-
-    }
-
-    public void testSetStatus() throws Exception {
-
-    }
-
-    public void testGetCurrentLeaderNum() throws Exception {
-
-    }
-
-    public void testSetCurrentLeaderNum() throws Exception {
-
-    }
-
-    public void testGetTotalTaskSuccessCount() throws Exception {
-
-    }
-
-    public void testSetTotalTaskSuccessCount() throws Exception {
-
-    }
-
-    public void testGetTotalTaskFailCount() throws Exception {
-
-    }
-
-    public void testSetTotalTaskFailCount() throws Exception {
-
     }
 
 }

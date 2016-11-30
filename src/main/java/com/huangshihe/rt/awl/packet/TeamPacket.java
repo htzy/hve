@@ -1,27 +1,50 @@
 package com.huangshihe.rt.awl.packet;
 
+import com.huangshihe.game.awl.core.AwlUser;
+import com.huangshihe.game.awl.core.Team;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by Administrator on 2016/8/14.
  */
 public class TeamPacket {
-    private int creatorId;
+
+    private int creatorNum;
 
     private List<Integer> members;
 
-    public TeamPacket(int creatorId, List<Integer> members) {
-        setCreatorId(creatorId);
-        setMembers(members);
+    private int memberCount;
+
+    private String info;
+
+    private int status;
+
+    private TaskPacket taskPacket;
+
+    public TeamPacket() {
+
     }
 
-    public int getCreatorId() {
-        return creatorId;
+    public TeamPacket(Team team) {
+        if (team != null) {
+            setCreatorNum(team.getLeaderNum());
+            setMemberCount(team.getRuledMemberCount());
+            getMembers().addAll(team.getMembers().stream().map(AwlUser::getNum).collect(Collectors.toList()));
+            setInfo(team.getVoteResult());
+            setStatus(team.getStatus());
+            setTaskPacket(new TaskPacket(team.getTask()));
+        }
     }
 
-    public void setCreatorId(int creatorId) {
-        this.creatorId = creatorId;
+    public int getCreatorNum() {
+        return creatorNum;
+    }
+
+    public void setCreatorNum(int creatorNum) {
+        this.creatorNum = creatorNum;
     }
 
     public List<Integer> getMembers() {
@@ -32,18 +55,50 @@ public class TeamPacket {
     }
 
     public void setMembers(List<Integer> members) {
-        if (members == null) {
-            members = new ArrayList<Integer>();
-        }
         this.members = members;
     }
 
+    public int getMemberCount() {
+        return memberCount;
+    }
+
+    public void setMemberCount(int memberCount) {
+        this.memberCount = memberCount;
+    }
+
+    public String getInfo() {
+        return info;
+    }
+
+    public void setInfo(String info) {
+        this.info = info;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    public TaskPacket getTaskPacket() {
+        return taskPacket;
+    }
+
+    public void setTaskPacket(TaskPacket taskPacket) {
+        this.taskPacket = taskPacket;
+    }
 
     @Override
     public String toString() {
         return "TeamPacket{" +
-                "creatorId=" + getCreatorId() +
-                ", members=" + getMembers() +
+                "creatorNum=" + creatorNum +
+                ", members=" + members +
+                ", memberCount=" + memberCount +
+                ", info='" + info + '\'' +
+                ", status=" + status +
+                ", taskPacket=" + taskPacket +
                 '}';
     }
 }

@@ -1,6 +1,8 @@
 package com.huangshihe.rt.awl.packet;
 
 import com.huangshihe.game.awl.core.Awl;
+import com.huangshihe.game.awl.core.Task;
+import com.huangshihe.game.awl.core.Team;
 import com.huangshihe.game.core.GameUser;
 
 import java.util.ArrayList;
@@ -60,17 +62,19 @@ public class BasePacket {
     private VotePacket votePacket;
 
     /**
-     * 任务信息包
+     * 对于该awl对象的所有玩家生效的基本信息包
+     *
+     * @param awl
      */
-    private TaskPacket taskPacket;
-
-
     public BasePacket(Awl awl) {
         setCreatorId(awl.getCreatorId());
         setSuccessTimes(awl.getTotalTaskSuccessCount());
         setFailTimes(awl.getTotalTaskFailCount());
         setStatus(awl.getStatus());
-
+        Team team = awl.getCurrentTeam();
+        if (team != null) {
+            setTeamPacket(new TeamPacket(team));
+        }
 //        for (GameUser gameUser : awl.getGamers()){
 //            getUserPackets().add(new UserPacket(gameUser));
 //        }
@@ -79,6 +83,23 @@ public class BasePacket {
         getUserPackets().sort(Comparator.comparing(UserPacket::getIdentityNum));
     }
 
+    public BasePacket(Awl awl, Team lastTeam){
+        setCreatorId(awl.getCreatorId());
+        setSuccessTimes(awl.getTotalTaskSuccessCount());
+        setFailTimes(awl.getTotalTaskFailCount());
+        setStatus(awl.getStatus());
+        setTeamPacket(new TeamPacket(lastTeam));
+        getUserPackets().addAll(awl.getGamers().stream().map(UserPacket::new)
+                .collect(Collectors.toList()));
+        getUserPackets().sort(Comparator.comparing(UserPacket::getIdentityNum));
+    }
+
+    /**
+     * 对于该玩家生效的基本信息包
+     *
+     * @param gameUser
+     * @param status
+     */
     public BasePacket(GameUser gameUser, int status) {
         setStatus(status);
         getUserPackets().add(new UserPacket(gameUser));
@@ -159,14 +180,6 @@ public class BasePacket {
         this.votePacket = votePacket;
     }
 
-    public TaskPacket getTaskPacket() {
-        return taskPacket;
-    }
-
-    public void setTaskPacket(TaskPacket taskPacket) {
-        this.taskPacket = taskPacket;
-    }
-
     @Override
     public String toString() {
         return "BasePacket{" +
@@ -179,7 +192,6 @@ public class BasePacket {
                 ", userPackets=" + userPackets +
                 ", teamPacket=" + teamPacket +
                 ", votePacket=" + votePacket +
-                ", taskPacket=" + taskPacket +
                 '}';
     }
 }

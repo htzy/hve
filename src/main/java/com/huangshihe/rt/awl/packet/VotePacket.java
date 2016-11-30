@@ -4,18 +4,26 @@ package com.huangshihe.rt.awl.packet;
  * Created by Administrator on 2016/8/14.
  */
 public class VotePacket {
-    private int awlUserId;
+    private int awlUserNum;
     /**
      * 投票结果，是否同意
      */
     private boolean agree;
 
-    public int getAwlUserId() {
-        return awlUserId;
+    public VotePacket() {
     }
 
-    public void setAwlUserId(int awlUserId) {
-        this.awlUserId = awlUserId;
+    public VotePacket(int awlUserNum, boolean agree) {
+        this.awlUserNum = awlUserNum;
+        this.agree = agree;
+    }
+
+    public int getAwlUserNum() {
+        return awlUserNum;
+    }
+
+    public void setAwlUserNum(int awlUserNum) {
+        this.awlUserNum = awlUserNum;
     }
 
     public boolean isAgree() {
@@ -29,8 +37,8 @@ public class VotePacket {
     @Override
     public String toString() {
         return "VotePacket{" +
-                "awlUserId=" + getAwlUserId() +
-                ", agree=" + isAgree() +
+                "awlUserNum=" + awlUserNum +
+                ", agree=" + agree +
                 '}';
     }
 }

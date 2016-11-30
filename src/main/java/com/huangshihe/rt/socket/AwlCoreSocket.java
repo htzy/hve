@@ -1,10 +1,12 @@
 package com.huangshihe.rt.socket;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.huangshihe.game.awl.core.Awl;
-import com.huangshihe.game.awl.core.AwlUser;
+import com.huangshihe.game.awl.core.*;
 import com.huangshihe.game.awl.manage.AwlCache;
+import com.huangshihe.rt.awl.packet.MessagePacket;
 import com.huangshihe.rt.awl.packet.BasePacket;
+import com.huangshihe.rt.awl.packet.TeamPacket;
+import com.huangshihe.rt.awl.packet.VotePacket;
 import com.huangshihe.rt.model.User;
 
 import javax.websocket.*;
@@ -105,7 +107,50 @@ public class AwlCoreSocket {
     @OnMessage
     public void onMessage(String message) {
         // TODO 规定接收数据方式，解析message信息
-        AwlCoreSocket.broadCast(user.getUsername() + ">" + message);
+//      接收格式：操作+数据
+//      {"operate":"postTeam/postTask/getTeamInfo/postVote","data":"TeamPacket.class/Task.class/Team.class/Vote.class"}
+        try {
+            MessagePacket packet = objectMapper.readValue(message, MessagePacket.class);
+            Awl awl = AwlCache.getInstance().get(creatorId);
+            Team team = awl.getCurrentTeam();
+            Task task = awl.getCurrentTask();
+            // 提交队伍信息
+            if ("postTeam".equals(packet.getOperate())) {
+                TeamPacket teamPacket = packet.getTeamPacket();
+                awl.initCurrentTeamMembers(teamPacket.getCreatorNum(), teamPacket.getMembers());
+                broadCast(new BasePacket(awl));
+            } else if ("postVote".equals(packet.getOperate())) {
+                VotePacket votePacket = packet.getVotePacket();
+                team.addVote(votePacket.getAwlUserNum(), votePacket.isAgree());
+                broadCast(new BasePacket(awl));
+            } else if ("nextTeam".equals(packet.getOperate())) {
+                // 只有接收到当前队长发送该包时，才更新队长
+                if (awl.getCurrentLeaderNum() == packet.getDataToInt()) {
+                    awl.updateCurrentLeaderNum();
+                    awl.createTeam();
+                    broadCast(new BasePacket(awl));
+                }
+            } else if ("postTask".equals(packet.getOperate())) {
+                // TODO 提交任务，需要校验？
+                VotePacket votePacket = packet.getVotePacket();
+                task.add(votePacket.getAwlUserNum(), votePacket.isAgree());
+                // 当前需要进行的任务数与当前队伍中的members数一致
+                // 当已进行的任务数没有达到当前队伍中的members数时，说明还需继续等待客户端发送“postTask”
+                // 当任务已经做完，则更新队伍状态为成功，即过时状态
+                if (task.isDone()) {
+                    team.setStatus(Team.STATUS_SUCCESS);
+                    if (task.isSuccess()) {
+                        awl.setTotalTaskSuccessCount(awl.getTotalTaskSuccessCount() + 1);
+                    } else {
+                        awl.setTotalTaskFailCount(awl.getTotalTaskFailCount() + 1);
+                    }
+                    // 当前队伍已属于过时队伍
+                    broadCast(new BasePacket(awl, team));
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**

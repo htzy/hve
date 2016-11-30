@@ -1,43 +1,57 @@
 package com.huangshihe.rt.awl.packet;
 
 import com.huangshihe.game.awl.core.Task;
+import com.huangshihe.game.awl.core.Vote;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by Administrator on 2016/8/15.
  */
 public class TaskPacket {
-    /**
-     * 任务创建者id
-     */
-    private int creatorId;
-    /**
-     * 任务回复项大小
-     */
-    private int itemSize;
 
-    public int getCreatorId() {
-        return creatorId;
+    private List<Integer> members;
+
+    private boolean result;
+
+    public TaskPacket() {
     }
 
-    public void setCreatorId(int creatorId) {
-        this.creatorId = creatorId;
-    }
-
-    public int getItemSize() {
-        return itemSize;
-    }
-
-    public void setItemSize(int itemSize) {
-        if(itemSize == Task.BAD_ITEM_SIZE || itemSize == Task.GOOD_ITEM_SIZE){
-            this.itemSize = itemSize;
+    public TaskPacket(Task task) {
+        if (task != null){
+            getMembers().addAll(task.getVotes().stream().map(Vote::getAwlUserNum).collect(Collectors.toList()));
+            if (task.isDone()) {
+                result = task.isSuccess();
+            }
         }
+    }
+
+    public List<Integer> getMembers() {
+        if (members == null) {
+            members = new ArrayList<Integer>();
+        }
+        return members;
+    }
+
+    public void setMembers(List<Integer> members) {
+        this.members = members;
+    }
+
+    public boolean isResult() {
+        return result;
+    }
+
+    public void setResult(boolean result) {
+        this.result = result;
     }
 
     @Override
     public String toString() {
         return "TaskPacket{" +
-                "creatorId=" + getCreatorId() +
-                ", itemSize=" + getItemSize() +
+                "members=" + members +
+                ", result=" + result +
                 '}';
     }
 }
