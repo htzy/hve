@@ -110,6 +110,8 @@ public class Team {
         if (getVotes().size() == 5 && getStatus() == STATUS_CREATING) {
             info.append("投票已完成！队长：");
             info.append(getLeaderNum());
+            info.append("，队员：");
+            info.append(getMembers().stream().map(AwlUser::getNum).sorted().collect(Collectors.toList()));
             List<Vote> agrees = getAgreeVotes();
             List<Vote> disAgrees = getDisAgreeVotes();
             if (agrees.size() > disAgrees.size()) {

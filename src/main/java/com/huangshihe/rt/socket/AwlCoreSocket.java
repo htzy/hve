@@ -106,6 +106,9 @@ public class AwlCoreSocket {
      */
     @OnMessage
     public void onMessage(String message) {
+        // TODO now 当创建team失败应该记录延迟，当Task任务失败或成功后，动态更新显示到页面上失败和成功的次数，写出最后的游戏结果。
+
+
         // TODO 规定接收数据方式，解析message信息
 //      接收格式：操作+数据
 //      {"operate":"postTeam/postTask/getTeamInfo/postVote","data":"TeamPacket.class/Task.class/Team.class/Vote.class"}

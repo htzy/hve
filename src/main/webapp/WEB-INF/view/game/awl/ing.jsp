@@ -382,7 +382,6 @@
             // 如果队伍组建成功，给队员创建任务，好人只能创建1个选项，坏人可以创建两个选项
             createTask(basePacket);
         } else if (teamPacket.status == -1) {
-            // TODO next
             // 如果队伍组建失败，则取消创建任务，并向服务器发送信息，要求进行下一轮队长选队员。
             if (teamPacket.creatorNum == selfNum){
                 coreWs.send("{\"operate\":\"nextTeam\", \"data\":" + selfNum + "}");
