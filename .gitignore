@@ -1,9 +1,11 @@
 /.idea/
 /target/
 /out/
-/src/sql/huangshihe_rt.sql
+/awl-web/src/sql/huangshihe_rt.sql
 /game-awl/target/
 /jfinal-lambda/target/
+/awl-web/target/
 /classes/
 *.class
 *.iml
+*.log
