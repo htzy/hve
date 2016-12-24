@@ -125,6 +125,12 @@ public class AwlCoreSocket {
             } else if ("postVote".equals(packet.getOperate())) {
                 VotePacket votePacket = packet.getVotePacket();
                 team.addVote(votePacket.getAwlUserNum(), votePacket.isAgree());
+                if (team.isFinishVoted()) {
+                    // 如果组建失败
+                    if (!team.isSuccess()) {
+                        awl.setTotalTaskFailCount(awl.getTotalTaskFailCount() + 1);
+                    }
+                }
                 broadCast(new BasePacket(awl));
             } else if ("nextTeam".equals(packet.getOperate())) {
                 // 只有接收到当前队长发送该包时，才更新队长
@@ -165,28 +171,6 @@ public class AwlCoreSocket {
     public void onError(Throwable throwable) {
         System.err.println("awl core socket error:" + throwable.getLocalizedMessage());
         throwable.printStackTrace();
-    }
-
-    /**
-     * 发送或广播信息
-     *
-     * @param message
-     */
-    @Deprecated
-    private static void broadCast(String message) {
-        for (AwlCoreSocket socket : connections) {
-            try {
-                synchronized (socket) {
-                    socket.session.getBasicRemote().sendText(message);
-                }
-            } catch (IOException e) {
-                connections.remove(socket);
-                try {
-                    socket.session.close();
-                } catch (IOException ignored) {
-                }
-            }
-        }
     }
 
     /**

@@ -97,6 +97,17 @@
 
             </div>
         </div>
+        <div class="row">
+            <div class="col-sm-4" id="totalSuccessTimesDiv">
+                
+            </div>
+            <div class="col-sm-4" id="totalFailTimesDiv">
+                
+            </div>
+            <div class="col-sm-4" id="delayTimesDiv">
+
+            </div>
+        </div>
     </div>
 </div>
 </body>
@@ -161,6 +172,7 @@
                 renderTeam($message);
                 renderVote($message);
                 renderTask($message);
+                updateResult($message);
             } else if ($message.status == 2) {
                 console.info("游戏结束！");
                 alert("欢迎再来...see you~");
@@ -437,6 +449,16 @@
         var $voteDiv = $("#voteDiv");
         $teamDiv.empty();
         $voteDiv.empty();
+    }
+    
+    function updateResult(basePacket) {
+        var $totalSuccessTimes = $("#totalSuccessTimesDiv");
+        var $totalFailTimes = $("#totalFailTimesDiv");
+//        var $delayTimes = $("#delayTimesDiv");
+        $totalSuccessTimes.html(basePacket.successTimes);
+        $totalFailTimes.html(basePacket.failTimes);
+//        $delayTimes.html(basePacket.delayTimes);
+
     }
 
     //////////////////////////////////////////////

@@ -17,7 +17,6 @@ public class BasePacket {
 
     /**
      * 延迟次数
-     * TODO 暂不使用延时
      */
     private int delayTimes;
 
@@ -75,22 +74,17 @@ public class BasePacket {
         if (team != null) {
             setTeamPacket(new TeamPacket(team));
         }
-//        for (GameUser gameUser : awl.getGamers()){
-//            getUserPackets().add(new UserPacket(gameUser));
-//        }
-        getUserPackets().addAll(awl.getGamers().stream().map(UserPacket::new)
-                .collect(Collectors.toList()));
+        getUserPackets().addAll(awl.getGamers().stream().map(UserPacket::new).collect(Collectors.toList()));
         getUserPackets().sort(Comparator.comparing(UserPacket::getIdentityNum));
     }
 
-    public BasePacket(Awl awl, Team lastTeam){
+    public BasePacket(Awl awl, Team lastTeam) {
         setCreatorId(awl.getCreatorId());
         setSuccessTimes(awl.getTotalTaskSuccessCount());
         setFailTimes(awl.getTotalTaskFailCount());
         setStatus(awl.getStatus());
         setTeamPacket(new TeamPacket(lastTeam));
-        getUserPackets().addAll(awl.getGamers().stream().map(UserPacket::new)
-                .collect(Collectors.toList()));
+        getUserPackets().addAll(awl.getGamers().stream().map(UserPacket::new).collect(Collectors.toList()));
         getUserPackets().sort(Comparator.comparing(UserPacket::getIdentityNum));
     }
 
