@@ -76,7 +76,6 @@ public class AwlCoreSocket {
         // 该玩家加入到游戏中
         awl.add(new AwlUser(awlUserId));
         connections.add(this);
-
         AwlCoreSocket.broadCast(new BasePacket(awl));
     }
 
@@ -106,12 +105,9 @@ public class AwlCoreSocket {
      */
     @OnMessage
     public void onMessage(String message) {
-        // TODO now 当创建team失败应该记录延迟，当Task任务失败或成功后，动态更新显示到页面上失败和成功的次数，写出最后的游戏结果。
-
-
         // TODO 规定接收数据方式，解析message信息
 //      接收格式：操作+数据
-//      {"operate":"postTeam/postTask/getTeamInfo/postVote","data":"TeamPacket.class/Task.class/Team.class/Vote.class"}
+//      {"operate":"postTeam/postTask/getTeamInfo/postVote/chat","data":"TeamPacket.class/Task.class/Team.class/Vote.class/String"}
         try {
             MessagePacket packet = objectMapper.readValue(message, MessagePacket.class);
             Awl awl = AwlCache.getInstance().get(creatorId);
@@ -126,10 +122,8 @@ public class AwlCoreSocket {
                 VotePacket votePacket = packet.getVotePacket();
                 team.addVote(votePacket.getAwlUserNum(), votePacket.isAgree());
                 if (team.isFinishVoted()) {
-                    // 如果组建失败
-                    if (!team.isSuccess()) {
-                        awl.setTotalTaskFailCount(awl.getTotalTaskFailCount() + 1);
-                    }
+                    // 如果组建成功，delayTimes重置为0，否则自增
+                    awl.updateDelayTimes(team.isSuccess());
                 }
                 broadCast(new BasePacket(awl));
             } else if ("nextTeam".equals(packet.getOperate())) {
@@ -148,14 +142,13 @@ public class AwlCoreSocket {
                 // 当任务已经做完，则更新队伍状态为成功，即过时状态
                 if (task.isDone()) {
                     team.setStatus(Team.STATUS_SUCCESS);
-                    if (task.isSuccess()) {
-                        awl.setTotalTaskSuccessCount(awl.getTotalTaskSuccessCount() + 1);
-                    } else {
-                        awl.setTotalTaskFailCount(awl.getTotalTaskFailCount() + 1);
-                    }
+                    awl.updateTotalTaskCount(task.isSuccess());
                     // 当前队伍已属于过时队伍
                     broadCast(new BasePacket(awl, team));
                 }
+            } else if ("chat".equals(packet.getOperate())) {
+                // 聊天
+                chatBroadCast(packet.getData());
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -192,6 +185,29 @@ public class AwlCoreSocket {
                     socket.session.close();
                 } catch (IOException ignored) {
                 }
+            }
+        }
+    }
+
+    /**
+     * 广播聊天信息
+     *
+     * @param message
+     */
+    private static void chatBroadCast(String message) {
+        for (AwlCoreSocket socket : connections) {
+            try {
+                synchronized (socket) {
+                    String str = "{\"data\":\"" + message + "\"}";
+                    socket.session.getBasicRemote().sendText(str);
+                }
+            } catch (IOException e) {
+                connections.remove(socket);
+                try {
+                    socket.session.close();
+                } catch (IOException e1) {
+                }
+                AwlCoreSocket.chatBroadCast(String.format("系统提示 > %s已意外掉线！", socket.user.getUsername()));
             }
         }
     }

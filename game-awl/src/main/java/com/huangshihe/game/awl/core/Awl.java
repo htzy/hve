@@ -21,6 +21,7 @@ public class Awl implements Game {
     private int currentLeaderNum;
     private int totalTaskSuccessCount;
     private int totalTaskFailCount;
+    private int delayTimes;
 
     private List<GameUser> awlUsers;
 
@@ -64,6 +65,7 @@ public class Awl implements Game {
         currentLeaderNum = 0;
         totalTaskSuccessCount = 0;
         totalTaskFailCount = 0;
+        delayTimes = 0;
         // 游戏开始
         status = STATUS_ING;
         createTeam();
@@ -250,6 +252,23 @@ public class Awl implements Game {
 
     public void setTotalTaskFailCount(int totalTaskFailCount) {
         this.totalTaskFailCount = totalTaskFailCount;
+    }
+
+    public void updateTotalTaskCount(boolean isTaskSuccess) {
+        int count = isTaskSuccess ? ++totalTaskSuccessCount : ++totalTaskFailCount;
+        System.out.println("Awl::updateTotalTaskCount::" + count);
+        if (count >= 3) {
+            setStatus(STATUS_ED);
+        }
+    }
+
+    public int getDelayTimes() {
+        return delayTimes;
+    }
+
+    public void updateDelayTimes(boolean teamSuccess) {
+        // 如果前一个队伍创建成功，则delayTimes重新归位为0，否则自增1
+        delayTimes = teamSuccess ? 0 : delayTimes + 1;
     }
 
     /**
