@@ -193,14 +193,13 @@
         if (document.readyState !== "complete") {
             log.buffer.push(s);
         } else {
-            document.getElementById("contentId").innerHTML += (s + "\n");
+            document.getElementById("contentId").innerHTML = (s + "\n") + document.getElementById("contentId").innerHTML;
         }
     };
     function sendMsg() {
         var $message = $("#messageId");
         var data;
-        // TODO now 当selfNum == 0 时有错，错误显示为用户名？？
-        if (selfNum == null || selfNum == "") {
+        if (selfNum === undefined) {
             data = "${loginUser.username}";
         } else {
             data = selfNum;
@@ -249,7 +248,7 @@
         var userPackets = packet.userPackets;
         $introduceInfo.html("游戏进行中，享受游戏吧...<br>玩家们：");
         // 清空之前的聊天记录
-        $("#contentId").html("系统提示 > 游戏开始了，别bibi了！");
+        $("#contentId").html("系统提示 > 游戏开始了，别bibi了！\n");
 
         $awlUserList.empty();
         for (var i = 0; i < userPackets.length; i++) {
@@ -475,27 +474,29 @@
         }
     }
 
-    function dealKillTask(event) {
+    function postKillTask(event) {
         var killedIdentityNum = $("input[name='member_num']:checked").val();
-        var userPackets = event.data.userPackets;
-        var mehring;
-        var info = "好人：";
-        for (var i = 1; i < userPackets.length; i++) {
-            info += " 编号：" + userPackets[i].identityNum + " 身份：" + userPackets[i].identityName + "；";
-            if (userPackets[i].identityName == "梅林") {
-                mehring = userPackets[i].identityNum;
-            }
-        }
-        if (killedIdentityNum == mehring) {
-            // 刺杀成功！坏人赢
-            info = "刺杀成功！" + info + "失败！";
-        } else {
-            // 刺杀失败！好人赢
-            info = "刺杀失败！" + info + "获得胜利！"
-        }
-        alert(info);
-        log("系统提示 > " + info);
-        alert("欢迎再来...see you~");
+        coreWs.send("{\"operate\":\"kill\", \"data\":\"" + killedIdentityNum + "\"}");
+
+//        var userPackets = event.data.userPackets;
+//        var mehring;
+//        var info = "好人：";
+//        for (var i = 1; i < userPackets.length; i++) {
+//            info += " 编号：" + userPackets[i].identityNum + " 身份：" + userPackets[i].identityName + "；";
+//            if (userPackets[i].identityName == "梅林") {
+//                mehring = userPackets[i].identityNum;
+//            }
+//        }
+//        if (killedIdentityNum == mehring) {
+//            // 刺杀成功！坏人赢
+//            info = "刺杀成功！" + info + "失败！";
+//        } else {
+//            // 刺杀失败！好人赢
+//            info = "刺杀失败！" + info + "获得胜利！"
+//        }
+//        alert(info);
+//        log("系统提示 > " + info);
+//        alert("欢迎再来...see you~");
 //        quitGame();
     }
 
@@ -511,7 +512,7 @@
                 for (var i = 1; i < userPackets.length; i++) {
                     taskTable.append($("<label><input type='radio' name='member_num' value='" + userPackets[i].identityNum + "'/>" + userPackets[i].identityNum + "</label>"))
                 }
-                var postBtn = $("<input type='button' value='刺杀'>").bind("click", {userPackets: userPackets}, dealKillTask);
+                var postBtn = $("<input type='button' value='刺杀'>").bind("click", {userPackets: userPackets}, postKillTask);
                 taskTable.append(postBtn);
                 $taskDiv.append(taskTable);
             }

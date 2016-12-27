@@ -149,6 +149,10 @@ public class AwlCoreSocket {
             } else if ("chat".equals(packet.getOperate())) {
                 // 聊天
                 chatBroadCast(packet.getData());
+            } else if ("kill".equals(packet.getOperate())) {
+                // 刺杀
+                String result = awl.toKill(packet.getDataToInt());
+                chatBroadCast("系统提示 > " + result);
             }
         } catch (IOException e) {
             e.printStackTrace();

@@ -92,12 +92,12 @@ public class BasePacket {
         if (awl.getStatus() == Awl.STATUS_ED && awl.getTotalTaskFailCount() >= 3) {
             // 坏人直接赢
             getUserPackets().addAll(awl.getGamers().stream()
-                    .filter(gameUser -> gameUser.getIdentity().getType()== AwlIdentity.BAD_TYPE)
+                    .filter(gameUser -> gameUser.getIdentity().getType() == AwlIdentity.BAD_TYPE)
                     .map(UserPacket::new).collect(Collectors.toList()));
         } else if (awl.getStatus() == Awl.STATUS_ED && awl.getTotalTaskSuccessCount() >= 3) {
             // 添加刺客信息，并附上其余的好人信息让刺客选择
             UserPacket assassin = new UserPacket(awl.getGamers().stream()
-                    .filter(gameUser -> gameUser.getIdentity().getId()== AwlIdentity.AwlIdentityEnum.ASSASSIN.ordinal())
+                    .filter(gameUser -> gameUser.getIdentity().getId() == AwlIdentity.AwlIdentityEnum.ASSASSIN.ordinal())
                     .findFirst().orElse(null));
             getUserPackets().add(assassin);
 
