@@ -81,17 +81,17 @@
 <div class="section">
     <div class="container">
         <div class="row">
-            <div class="col-md-6" id="teamDiv"></div>
-            <div class="col-md-6">
+            <div class="col-sm-6" id="teamDiv"></div>
+            <div class="col-sm-6">
                 <input name="message" id="messageId"/>
                 <button id="sendButton" onClick="sendMsg()">提交</button>
             </div>
         </div>
         <div class="row">
-            <div class="col-md-6" id="voteDiv">
+            <div class="col-sm-6" id="voteDiv">
 
             </div>
-            <div class="col-md-6" id="taskDiv">
+            <div class="col-sm-6" id="taskDiv">
 
             </div>
         </div>
@@ -125,28 +125,6 @@
     var selfNum;
     var selfType;
     function init() {
-        <%--// 聊天socket--%>
-        <%--chatWs = new WebSocket("ws://" + document.location.host + "${basePath}/ws/awl/chat/${loginUser.id}");--%>
-        <%--//监听消息--%>
-        <%--chatWs.onmessage = function (event) {--%>
-        <%--log(event.data);--%>
-        <%--};--%>
-        <%--// 关闭WebSocket--%>
-        <%--chatWs.onclose = function (event) {--%>
-
-        <%--//WebSocket Status:: Socket Closed--%>
-        <%--};--%>
-        <%--// 打开WebSocket--%>
-        <%--chatWs.onopen = function (event) {--%>
-        <%--//WebSocket Status:: Socket Open--%>
-        <%--// 发送一个初始化消息--%>
-        <%--//            chatWs.send("Hello, Server!");--%>
-        <%--};--%>
-        <%--chatWs.onerror = function (event) {--%>
-        <%--//WebSocket Status:: Error was reported--%>
-        <%--};--%>
-
-        /////////////////////////////////////////////////////////////
         // 核心socket
         coreWs = new WebSocket("ws://" + document.location.host + "${basePath}/ws/awl/core/${awl.creatorId}/${loginUser.id}");
 
@@ -162,6 +140,7 @@
             var $message = $.parseJSON(event.data);
             var $introduceInfo = $("#introduceInfo");
             if ($message.status == 0) {
+                // TODO now 除第一个玩家退出时无status属性
                 // 重新生成等待中的玩家列表，并提示用户。
                 renderWaitUserList($message.userPackets);
                 $introduceInfo.html("游戏等待中，快去呼唤你的小伙伴来加入你创建的游戏吧...<br>等待中的玩家们：");
@@ -228,10 +207,10 @@
                 var userPacket = userPackets[readyToAddList[i]];
                 if (userPacket.sex) {
                     $awlUserList.append("<li class='list-group-item' id='awlUser_" + userPacket.username + "'>" + userPacket.username + "<img src='" + userPacket.photo + "' " +
-                            "class='img-circle img-responsive col-md-2'>男</li>");
+                            "class='img-circle img-responsive col-sm-2'>男</li>");
                 } else {
                     $awlUserList.append("<li class='list-group-item' id='awlUser_" + userPacket.username + "'>" + userPacket.username + "<img src='" + userPacket.photo + "' " +
-                            "class='img-circle img-responsive col-md-2'>女</li>");
+                            "class='img-circle img-responsive col-sm-2'>女</li>");
                 }
             }
         }
@@ -261,14 +240,14 @@
                 // 好人1，坏人2
                 if (userPacket.identityType == 1) {
                     $awlUserList.append("<li class='list-group-item alert-success' id='awlUser_" + userPacket.identityNum + "'>" + userPacket.identityNum + "<img src='" + userPacket.photo + "' " +
-                            "class='img-circle img-responsive col-md-2'>" + userPacket.identityName + "</li>");
+                            "class='img-circle img-responsive col-sm-2'>" + userPacket.identityName + "</li>");
                 } else {
                     $awlUserList.append("<li class='list-group-item alert-danger' id='awlUser_" + userPacket.identityNum + "'>" + userPacket.identityNum + "<img src='" + userPacket.photo + "' " +
-                            "class='img-circle img-responsive col-md-2'>" + userPacket.identityName + "</li>");
+                            "class='img-circle img-responsive col-sm-2'>" + userPacket.identityName + "</li>");
                 }
             } else {
                 $awlUserList.append("<li class='list-group-item alert-warning' id='awlUser_" + userPacket.identityNum + "'>" + userPacket.identityNum + "<img src='" + userPacket.photo + "' " +
-                        "class='img-circle img-responsive col-md-2'>未知身份</li>");
+                        "class='img-circle img-responsive col-sm-2'>未知身份</li>");
             }
         }
     }
@@ -467,37 +446,17 @@
         var $delayTimes = $("#delayTimesDiv span");
         $totalSuccessTimes.html(basePacket.successTimes);
         $totalFailTimes.html(basePacket.failTimes);
-        $delayTimes.html(basePacket.delayTimes);
         if (basePacket.delayTimes >= 4) {
             // 延迟次数已达到上限，由新队长选人，可跳过投票环节
-            alert("延迟次数已达到上限，新队长选人时，请直接同意！");
+            $delayTimes.html("延迟次数已达到上限，新队长选人时，请直接同意！");
+        } else {
+            $delayTimes.html(basePacket.delayTimes);
         }
     }
 
     function postKillTask(event) {
         var killedIdentityNum = $("input[name='member_num']:checked").val();
         coreWs.send("{\"operate\":\"kill\", \"data\":\"" + killedIdentityNum + "\"}");
-
-//        var userPackets = event.data.userPackets;
-//        var mehring;
-//        var info = "好人：";
-//        for (var i = 1; i < userPackets.length; i++) {
-//            info += " 编号：" + userPackets[i].identityNum + " 身份：" + userPackets[i].identityName + "；";
-//            if (userPackets[i].identityName == "梅林") {
-//                mehring = userPackets[i].identityNum;
-//            }
-//        }
-//        if (killedIdentityNum == mehring) {
-//            // 刺杀成功！坏人赢
-//            info = "刺杀成功！" + info + "失败！";
-//        } else {
-//            // 刺杀失败！好人赢
-//            info = "刺杀失败！" + info + "获得胜利！"
-//        }
-//        alert(info);
-//        log("系统提示 > " + info);
-//        alert("欢迎再来...see you~");
-//        quitGame();
     }
 
     function dealGameResult(basePacket) {
@@ -527,7 +486,6 @@
             alert(info);
             log("系统提示 > " + info);
             alert("欢迎再来...see you~");
-//            quitGame();
         }
     }
 

@@ -285,7 +285,7 @@ public class Awl implements Game {
                             .append("编号：").append(gameUser.getNum())
                             .append("，身份：").append(gameUser.getIdentity().getName()).append("； "));
             result.append("赢！");
-        } else if (result.length() < 0) {
+        } else if (result.length() == 0) {
             result.append("刺客刺杀任务失败！好人：");
             getGamers().stream().filter(gameUser -> gameUser.getIdentity().getType() == AwlIdentity.GOOD_TYPE)
                     .forEach(gameUser -> result
