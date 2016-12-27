@@ -12,6 +12,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 /**
  * Created by root on 5/16/16.
  */
+@Deprecated
 @ServerEndpoint(value = "/ws/awl/chat/{awlUserId}")
 public class AwlChatSocket {
     /**

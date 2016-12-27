@@ -81,20 +81,29 @@
 <div class="section">
     <div class="container">
         <div class="row">
-            <div class="col-md-6" id="teamDiv"></div>
-            <div class="col-md-6">
+            <div class="col-sm-6" id="teamDiv"></div>
+            <div class="col-sm-6">
                 <input name="message" id="messageId"/>
                 <button id="sendButton" onClick="sendMsg()">提交</button>
-                <input>
-                <input type="button" value="私密">
             </div>
         </div>
         <div class="row">
-            <div class="col-md-6" id="voteDiv">
+            <div class="col-sm-6" id="voteDiv">
 
             </div>
-            <div class="col-md-6" id="taskDiv">
+            <div class="col-sm-6" id="taskDiv">
 
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-4" id="totalSuccessTimesDiv">
+                累计任务成功次数：<span></span>
+            </div>
+            <div class="col-sm-4" id="totalFailTimesDiv">
+                累计任务失败次数：<span></span>
+            </div>
+            <div class="col-sm-4" id="delayTimesDiv">
+                累计延迟次数：<span></span>
             </div>
         </div>
     </div>
@@ -111,33 +120,11 @@
     } else {
         init();
     }
-    var chatWs;
+    //    var chatWs;
     var coreWs;
     var selfNum;
     var selfType;
     function init() {
-        // 聊天socket
-        chatWs = new WebSocket("ws://" + document.location.host + "${basePath}/ws/awl/chat/${loginUser.id}");
-        //监听消息
-        chatWs.onmessage = function (event) {
-            log(event.data);
-        };
-        // 关闭WebSocket
-        chatWs.onclose = function (event) {
-
-            //WebSocket Status:: Socket Closed
-        };
-        // 打开WebSocket
-        chatWs.onopen = function (event) {
-            //WebSocket Status:: Socket Open
-            // 发送一个初始化消息
-//            chatWs.send("Hello, Server!");
-        };
-        chatWs.onerror = function (event) {
-            //WebSocket Status:: Error was reported
-        };
-
-        /////////////////////////////////////////////////////////////
         // 核心socket
         coreWs = new WebSocket("ws://" + document.location.host + "${basePath}/ws/awl/core/${awl.creatorId}/${loginUser.id}");
 
@@ -149,9 +136,11 @@
             console.info(event.data);
             // 如果游戏状态为等待中，则检查玩家信息是否正确；当游戏状态为进行中，则检查当前界面是否处于进行中
             // 将string数据转为json。
+
             var $message = $.parseJSON(event.data);
             var $introduceInfo = $("#introduceInfo");
             if ($message.status == 0) {
+                // TODO now 除第一个玩家退出时无status属性
                 // 重新生成等待中的玩家列表，并提示用户。
                 renderWaitUserList($message.userPackets);
                 $introduceInfo.html("游戏等待中，快去呼唤你的小伙伴来加入你创建的游戏吧...<br>等待中的玩家们：");
@@ -161,14 +150,17 @@
                 renderTeam($message);
                 renderVote($message);
                 renderTask($message);
+                updateResult($message);
             } else if ($message.status == 2) {
-                console.info("游戏结束！");
-                alert("欢迎再来...see you~");
-                quitGame();
+                renderTask($message);
+                updateResult($message);
+                dealGameResult($message);
             } else if ($message.status == -1) {
                 // 删除已退出玩家
                 deleteAwlUser($message.userPackets);
                 $introduceInfo.html("有人退出了！游戏进入等待中，快去呼唤你的小伙伴来加入你创建的游戏吧...<br>等待中的玩家们：");
+            } else {
+                log($message.data);
             }
         };
 
@@ -180,12 +172,19 @@
         if (document.readyState !== "complete") {
             log.buffer.push(s);
         } else {
-            document.getElementById("contentId").innerHTML += (s + "\n");
+            document.getElementById("contentId").innerHTML = (s + "\n") + document.getElementById("contentId").innerHTML;
         }
     };
     function sendMsg() {
         var $message = $("#messageId");
-        chatWs.send($message.val());
+        var data;
+        if (selfNum === undefined) {
+            data = "${loginUser.username}";
+        } else {
+            data = selfNum;
+        }
+        data += " > " + $message.val();
+        coreWs.send("{\"operate\":\"chat\", \"data\":\"" + data + "\"}");
         $message.val("");
     }
 
@@ -208,10 +207,10 @@
                 var userPacket = userPackets[readyToAddList[i]];
                 if (userPacket.sex) {
                     $awlUserList.append("<li class='list-group-item' id='awlUser_" + userPacket.username + "'>" + userPacket.username + "<img src='" + userPacket.photo + "' " +
-                            "class='img-circle img-responsive col-md-2'>男</li>");
+                            "class='img-circle img-responsive col-sm-2'>男</li>");
                 } else {
                     $awlUserList.append("<li class='list-group-item' id='awlUser_" + userPacket.username + "'>" + userPacket.username + "<img src='" + userPacket.photo + "' " +
-                            "class='img-circle img-responsive col-md-2'>女</li>");
+                            "class='img-circle img-responsive col-sm-2'>女</li>");
                 }
             }
         }
@@ -227,6 +226,9 @@
         var awlUserId = packet.awlUserId;
         var userPackets = packet.userPackets;
         $introduceInfo.html("游戏进行中，享受游戏吧...<br>玩家们：");
+        // 清空之前的聊天记录
+        $("#contentId").html("系统提示 > 游戏开始了，别bibi了！\n");
+
         $awlUserList.empty();
         for (var i = 0; i < userPackets.length; i++) {
             var userPacket = userPackets[i];
@@ -238,14 +240,14 @@
                 // 好人1，坏人2
                 if (userPacket.identityType == 1) {
                     $awlUserList.append("<li class='list-group-item alert-success' id='awlUser_" + userPacket.identityNum + "'>" + userPacket.identityNum + "<img src='" + userPacket.photo + "' " +
-                            "class='img-circle img-responsive col-md-2'>" + userPacket.identityName + "</li>");
+                            "class='img-circle img-responsive col-sm-2'>" + userPacket.identityName + "</li>");
                 } else {
                     $awlUserList.append("<li class='list-group-item alert-danger' id='awlUser_" + userPacket.identityNum + "'>" + userPacket.identityNum + "<img src='" + userPacket.photo + "' " +
-                            "class='img-circle img-responsive col-md-2'>" + userPacket.identityName + "</li>");
+                            "class='img-circle img-responsive col-sm-2'>" + userPacket.identityName + "</li>");
                 }
             } else {
                 $awlUserList.append("<li class='list-group-item alert-warning' id='awlUser_" + userPacket.identityNum + "'>" + userPacket.identityNum + "<img src='" + userPacket.photo + "' " +
-                        "class='img-circle img-responsive col-md-2'>未知身份</li>");
+                        "class='img-circle img-responsive col-sm-2'>未知身份</li>");
             }
         }
     }
@@ -285,11 +287,9 @@
     window.onunload = function () {
         // run correct on firefox, but chrome can't execute this code?
         coreWs.close();
-        chatWs.close();
     };
 
     function quitGame() {
-        chatWs.close();
         coreWs.close();
         window.location.href = "${basePath}/game_awl/quit";
     }
@@ -382,12 +382,11 @@
             // 如果队伍组建成功，给队员创建任务，好人只能创建1个选项，坏人可以创建两个选项
             createTask(basePacket);
         } else if (teamPacket.status == -1) {
-            // TODO next
             // 如果队伍组建失败，则取消创建任务，并向服务器发送信息，要求进行下一轮队长选队员。
-            if (teamPacket.creatorNum == selfNum){
+            if (teamPacket.creatorNum == selfNum) {
                 coreWs.send("{\"operate\":\"nextTeam\", \"data\":" + selfNum + "}");
             }
-        }else if (teamPacket.status == 1){
+        } else if (teamPacket.status == 1) {
             // 如果接收到任务结果（即组队成功，但是已过时），则显示任务结果，并要求进行下一轮队长选队员。
             var taskPacket = teamPacket.taskPacket;
             if (taskPacket.result) {
@@ -395,7 +394,8 @@
             } else {
                 log("系统提示 > 由" + taskPacket.members + "所做的任务失败！");
             }
-            if (teamPacket.creatorNum == selfNum){
+            // 当游戏结束后，不能再请求
+            if (basePacket.status == 1 && teamPacket.creatorNum == selfNum) {
                 coreWs.send("{\"operate\":\"nextTeam\", \"data\":" + selfNum + "}");
             }
         }
@@ -440,135 +440,53 @@
         $voteDiv.empty();
     }
 
-    //////////////////////////////////////////////
+    function updateResult(basePacket) {
+        var $totalSuccessTimes = $("#totalSuccessTimesDiv span");
+        var $totalFailTimes = $("#totalFailTimesDiv span");
+        var $delayTimes = $("#delayTimesDiv span");
+        $totalSuccessTimes.html(basePacket.successTimes);
+        $totalFailTimes.html(basePacket.failTimes);
+        if (basePacket.delayTimes >= 4) {
+            // 延迟次数已达到上限，由新队长选人，可跳过投票环节
+            $delayTimes.html("延迟次数已达到上限，新队长选人时，请直接同意！");
+        } else {
+            $delayTimes.html(basePacket.delayTimes);
+        }
+    }
 
-    <%--function createVote(currentLeaderNum, teamMemberCount, aliveGameUsersNum) {--%>
-    <%--if ($votePosition.find("tr").length > 0) {--%>
-    <%--return;--%>
-    <%--}--%>
-    <%--var title = $("<tr><td>current leader num:" + currentLeaderNum + ", please vote for this team!</td><tr>");--%>
-    <%--var voteTable = $("<table id='newVote'></table>").append(title);--%>
+    function postKillTask(event) {
+        var killedIdentityNum = $("input[name='member_num']:checked").val();
+        coreWs.send("{\"operate\":\"kill\", \"data\":\"" + killedIdentityNum + "\"}");
+    }
 
-    <%--$.post("${basePath}/awl/getTeamInfo",--%>
-    <%--{},--%>
-    <%--function (result) {--%>
-    <%--var membersNum = (result.membersNum + "").split(",");--%>
-    <%--for (var i = 0; i < aliveGameUsersNum.length; i++) {--%>
-    <%--if (has(aliveGameUsersNum[i], membersNum)) {--%>
-    <%--voteTable.append($("<label><input type='checkbox' checked " +--%>
-    <%--"disabled value='" + aliveGameUsersNum[i] + "'/>" + aliveGameUsersNum[i] + "</label>"))--%>
-
-    <%--} else {--%>
-    <%--voteTable.append($("<label><input type='checkbox' disabled " +--%>
-    <%--"value='" + aliveGameUsersNum[i] + "'/>" + aliveGameUsersNum[i] + "</label>"));--%>
-    <%--}--%>
-    <%--}--%>
-    <%--var post = $("<input type='button' onclick='postVote(" + true + ")' value='Yes'>" +--%>
-    <%--"<input type='button' onclick='postVote(" + false + ")' value='No'>");--%>
-    <%--voteTable.append(post);--%>
-    <%--$votePosition.append(voteTable);--%>
-    <%--}, "json");--%>
-    <%--}--%>
-
-    <%--function postVote(answer) {--%>
-    <%--$.post("${basePath}/awl/postVote",--%>
-    <%--{--%>
-    <%--"answer": answer--%>
-    <%--},--%>
-    <%--function (result) {--%>
-    <%--if (result.status == 0) {--%>
-    <%--$("#newVote input").attr("disabled", "disabled");--%>
-    <%--alert("success!");--%>
-    <%--} else {--%>
-    <%--alert(result.info);--%>
-    <%--}--%>
-    <%--}, "json");--%>
-    <%--}--%>
-
-    <%--function deleteTeam() {--%>
-    <%--//        if($teamPosition.find("tr").length == 0){--%>
-    <%--//            return;--%>
-    <%--//        }--%>
-    <%--$teamPosition.children().remove();--%>
-    <%--}--%>
-    <%--function deleteVote() {--%>
-    <%--//        if($votePosition.find("tr").length == 0){--%>
-    <%--//            return;--%>
-    <%--//        }--%>
-    <%--$votePosition.children().remove();--%>
-    <%--}--%>
-
-    <%--function deleteTask() {--%>
-    <%--$taskPosition.children().remove();--%>
-    <%--}--%>
-
-    <%--function deleteAll() {--%>
-    <%--deleteTeam();--%>
-    <%--deleteVote();--%>
-    <%--}--%>
-
-    <%--function has(value, arr) {--%>
-    <%--for (var i = 0; i < arr.length; i++) {--%>
-    <%--if (arr[i] == value) {--%>
-    <%--return true;--%>
-    <%--}--%>
-    <%--}--%>
-    <%--return false;--%>
-    <%--}--%>
-
-    <%--function dealTask(task) {--%>
-    <%--if (task == null || task == "") {--%>
-    <%--return;--%>
-    <%--} else {--%>
-    <%--createTask();--%>
-    <%--}--%>
-    <%--}--%>
-
-    <%--function createTask() {--%>
-    <%--if ($taskPosition.find("tr").length > 0) {--%>
-    <%--return;--%>
-    <%--}--%>
-    <%--var title = $("<tr><td>you have a task need to do</td><tr>");--%>
-    <%--var taskTable = $("<table id='newTask'></table>").append(title);--%>
-    <%--if (${loginUser.gameUser.identity.type}) {--%>
-    <%--taskTable.append($("<input type='button' onclick='postTask(" + true + ")' value='Yes'>"));--%>
-    <%--} else {--%>
-    <%--taskTable.append($("<input type='button' onclick='postTask(" + true + ")' value='Yes'>" +--%>
-    <%--"<input type='button' onclick='postTask(" + false + ")' value='No'>"))--%>
-    <%--}--%>
-    <%--$taskPosition.append(taskTable);--%>
-    <%--}--%>
-
-    <%--function postTask(answer) {--%>
-    <%--$.post("${basePath}/awl/postTask",--%>
-    <%--{--%>
-    <%--answer: answer--%>
-    <%--}, function (result) {--%>
-    <%--if (result.status == 0) {--%>
-    <%--alert("success!");--%>
-    <%--deleteTask();--%>
-    <%--} else {--%>
-    <%--alert(result.info);--%>
-    <%--}--%>
-    <%--}, "json");--%>
-    <%--}--%>
-
-    <%--function toKill() {--%>
-    <%--var num = $("#num").val();--%>
-    <%--if (num == null || num == "") {--%>
-    <%--alert("you should input num!");--%>
-    <%--return;--%>
-    <%--}--%>
-    <%--$.post("${basePath}/awl/toKill",--%>
-    <%--{--%>
-    <%--num: num--%>
-    <%--}, function (result) {--%>
-    <%--if (result.status == 0) {--%>
-    <%--alert("game is over!");--%>
-    <%--} else {--%>
-    <%--alert(result.info);--%>
-    <%--}--%>
-    <%--}, "json");--%>
-    <%--}--%>
+    function dealGameResult(basePacket) {
+        var userPackets = basePacket.userPackets;
+        if (basePacket.successTimes >= 3) {
+            // 坏人开始杀人，由刺客执行，开启私密讨论，必须杀预言家才赢
+            var assassin = userPackets[0];
+            if (assassin.identityNum == selfNum) {
+                var $taskDiv = $("#taskDiv");
+                var title = $("<tr><td>您需要指定刺杀对象</td></tr>");
+                var taskTable = $("<table id='killTask'></table>").append(title);
+                for (var i = 1; i < userPackets.length; i++) {
+                    taskTable.append($("<label><input type='radio' name='member_num' value='" + userPackets[i].identityNum + "'/>" + userPackets[i].identityNum + "</label>"))
+                }
+                var postBtn = $("<input type='button' value='刺杀'>").bind("click", {userPackets: userPackets}, postKillTask);
+                taskTable.append(postBtn);
+                $taskDiv.append(taskTable);
+            }
+        }
+        if (basePacket.failTimes >= 3) {
+            // 坏人直接赢
+            var info = "坏人：";
+            for (var i = 0; i < userPackets.length; i++) {
+                info += " 编号：" + userPackets[i].identityNum + " 身份：" + userPackets[i].identityName + "；";
+            }
+            info += "获得胜利！";
+            alert(info);
+            log("系统提示 > " + info);
+            alert("欢迎再来...see you~");
+        }
+    }
 
 </script>

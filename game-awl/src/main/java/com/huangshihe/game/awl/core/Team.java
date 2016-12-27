@@ -105,11 +105,17 @@ public class Team {
         return getVotes().stream().filter(Vote::isAgree).collect(Collectors.toList());
     }
 
+    public boolean isFinishVoted() {
+        return getVotes().size() == 5;
+    }
+
     public String getVoteResult() {
         // team的信息info只需要生成一次即可
         if (getVotes().size() == 5 && getStatus() == STATUS_CREATING) {
             info.append("投票已完成！队长：");
             info.append(getLeaderNum());
+            info.append("，队员：");
+            info.append(getMembers().stream().map(AwlUser::getNum).sorted().collect(Collectors.toList()));
             List<Vote> agrees = getAgreeVotes();
             List<Vote> disAgrees = getDisAgreeVotes();
             if (agrees.size() > disAgrees.size()) {
@@ -126,6 +132,15 @@ public class Team {
             }
         }
         return info.toString();
+    }
+
+    /**
+     * after isFinishVoted
+     * @return
+     */
+    public boolean isSuccess() {
+        long agreeNum = getVotes().stream().filter(Vote::isAgree).count();
+        return agreeNum > 5 - agreeNum;
     }
 
     public Task getTask() {

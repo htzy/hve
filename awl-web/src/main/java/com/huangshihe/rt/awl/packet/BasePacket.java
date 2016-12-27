@@ -1,6 +1,7 @@
 package com.huangshihe.rt.awl.packet;
 
 import com.huangshihe.game.awl.core.Awl;
+import com.huangshihe.game.awl.core.AwlIdentity;
 import com.huangshihe.game.awl.core.Task;
 import com.huangshihe.game.awl.core.Team;
 import com.huangshihe.game.core.GameUser;
@@ -17,7 +18,6 @@ public class BasePacket {
 
     /**
      * 延迟次数
-     * TODO 暂不使用延时
      */
     private int delayTimes;
 
@@ -70,28 +70,46 @@ public class BasePacket {
         setCreatorId(awl.getCreatorId());
         setSuccessTimes(awl.getTotalTaskSuccessCount());
         setFailTimes(awl.getTotalTaskFailCount());
+        setDelayTimes(awl.getDelayTimes());
         setStatus(awl.getStatus());
         Team team = awl.getCurrentTeam();
         if (team != null) {
             setTeamPacket(new TeamPacket(team));
         }
-//        for (GameUser gameUser : awl.getGamers()){
-//            getUserPackets().add(new UserPacket(gameUser));
-//        }
-        getUserPackets().addAll(awl.getGamers().stream().map(UserPacket::new)
-                .collect(Collectors.toList()));
+        getUserPackets().addAll(awl.getGamers().stream().map(UserPacket::new).collect(Collectors.toList()));
         getUserPackets().sort(Comparator.comparing(UserPacket::getIdentityNum));
     }
 
-    public BasePacket(Awl awl, Team lastTeam){
+    public BasePacket(Awl awl, Team lastTeam) {
         setCreatorId(awl.getCreatorId());
         setSuccessTimes(awl.getTotalTaskSuccessCount());
         setFailTimes(awl.getTotalTaskFailCount());
+        setDelayTimes(awl.getDelayTimes());
         setStatus(awl.getStatus());
         setTeamPacket(new TeamPacket(lastTeam));
-        getUserPackets().addAll(awl.getGamers().stream().map(UserPacket::new)
-                .collect(Collectors.toList()));
-        getUserPackets().sort(Comparator.comparing(UserPacket::getIdentityNum));
+
+        // 可能游戏已经结束
+        if (awl.getStatus() == Awl.STATUS_ED && awl.getTotalTaskFailCount() >= 3) {
+            // 坏人直接赢
+            getUserPackets().addAll(awl.getGamers().stream()
+                    .filter(gameUser -> gameUser.getIdentity().getType() == AwlIdentity.BAD_TYPE)
+                    .map(UserPacket::new).collect(Collectors.toList()));
+        } else if (awl.getStatus() == Awl.STATUS_ED && awl.getTotalTaskSuccessCount() >= 3) {
+            // 添加刺客信息，并附上其余的好人信息让刺客选择
+            UserPacket assassin = new UserPacket(awl.getGamers().stream()
+                    .filter(gameUser -> gameUser.getIdentity().getId() == AwlIdentity.AwlIdentityEnum.ASSASSIN.ordinal())
+                    .findFirst().orElse(null));
+            getUserPackets().add(assassin);
+
+            List<UserPacket> good = awl.getGamers().stream()
+                    .filter(gameUser -> gameUser.getIdentity().getType() == AwlIdentity.GOOD_TYPE)
+                    .map(UserPacket::new).collect(Collectors.toList());
+            good.sort(Comparator.comparing(UserPacket::getIdentityNum));
+            getUserPackets().addAll(good);
+        } else {
+            getUserPackets().addAll(awl.getGamers().stream().map(UserPacket::new).collect(Collectors.toList()));
+            getUserPackets().sort(Comparator.comparing(UserPacket::getIdentityNum));
+        }
     }
 
     /**

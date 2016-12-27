@@ -39,14 +39,18 @@ public class AwlController extends Controller {
     }
 
     public void quit() {
-        Awl awl = getSessionAttr("awl");
         User user = getSessionAttr("loginUser");
-        if (awl.getCreatorId() == user.getId()) {
-            // 如果是创建者退出，则结束该游戏
-            AwlCache.getInstance().remove(awl.getId());
-        } else {
-            // 如果是参与者退出，则去除该玩家
-            awl.remove(awl.getGamer(user.getId()));
+        try {
+            Awl awl = getSessionAttr("awl");
+            if (awl.getCreatorId() == user.getId()) {
+                // 如果是创建者退出，则结束该游戏
+                AwlCache.getInstance().remove(awl.getId());
+            } else {
+                // 如果是参与者退出，则去除该玩家
+                awl.remove(awl.getGamer(user.getId()));
+            }
+        } catch (NullPointerException ignored) {
+
         }
         redirect("/game_awl/");
     }

@@ -21,6 +21,7 @@ public class Awl implements Game {
     private int currentLeaderNum;
     private int totalTaskSuccessCount;
     private int totalTaskFailCount;
+    private int delayTimes;
 
     private List<GameUser> awlUsers;
 
@@ -64,6 +65,7 @@ public class Awl implements Game {
         currentLeaderNum = 0;
         totalTaskSuccessCount = 0;
         totalTaskFailCount = 0;
+        delayTimes = 0;
         // 游戏开始
         status = STATUS_ING;
         createTeam();
@@ -250,6 +252,48 @@ public class Awl implements Game {
 
     public void setTotalTaskFailCount(int totalTaskFailCount) {
         this.totalTaskFailCount = totalTaskFailCount;
+    }
+
+    public void updateTotalTaskCount(boolean isTaskSuccess) {
+        int count = isTaskSuccess ? ++totalTaskSuccessCount : ++totalTaskFailCount;
+        if (count >= 3) {
+            setStatus(STATUS_ED);
+        }
+    }
+
+    public int getDelayTimes() {
+        return delayTimes;
+    }
+
+    public void updateDelayTimes(boolean teamSuccess) {
+        // 如果前一个队伍创建成功，则delayTimes重新归位为0，否则自增1
+        delayTimes = teamSuccess ? 0 : delayTimes + 1;
+    }
+
+    public String toKill(int identityNum) {
+        StringBuilder result = new StringBuilder();
+        boolean isSuccess = false;
+        try {
+            isSuccess = getGameUserFromNum(identityNum).getIdentity().getId() == AwlIdentity.AwlIdentityEnum.MEHRING.ordinal();
+        } catch (NullPointerException e) {
+            result.append("不要瞎搞！");
+        }
+        if (isSuccess) {
+            result.append("刺客成功刺杀梅林，坏人：");
+            getGamers().stream().filter(gameUser -> gameUser.getIdentity().getType() == AwlIdentity.BAD_TYPE)
+                    .forEach(gameUser -> result
+                            .append("编号：").append(gameUser.getNum())
+                            .append("，身份：").append(gameUser.getIdentity().getName()).append("； "));
+            result.append("赢！");
+        } else if (result.length() == 0) {
+            result.append("刺客刺杀任务失败！好人：");
+            getGamers().stream().filter(gameUser -> gameUser.getIdentity().getType() == AwlIdentity.GOOD_TYPE)
+                    .forEach(gameUser -> result
+                            .append("编号：").append(gameUser.getNum())
+                            .append("，身份：").append(gameUser.getIdentity().getName()).append("； "));
+            result.append("赢！");
+        }
+        return result.toString();
     }
 
     /**
