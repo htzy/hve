@@ -8,16 +8,12 @@ import junit.framework.TestCase;
 public class AwlCacheTest extends TestCase {
     public void setUp() throws Exception {
         super.setUp();
-
-    }
-
-    public void testGetGames() throws Exception {
-
+        AwlCache.getInstance().remove(1);
     }
 
     public void testGetGame() throws Exception {
         assertEquals(null, AwlCache.getInstance().get(1));
-        AwlCache.getInstance().create(1,"11");
+        AwlCache.getInstance().create(1, "11");
         assertEquals(1, AwlCache.getInstance().get(1).getId());
     }
 

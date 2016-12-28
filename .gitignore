@@ -8,4 +8,5 @@
 /classes/
 *.class
 *.iml
+/awl-web/src/main/resources/a_little_config.txt
 *.log

@@ -28,7 +28,7 @@ public class AwlTest extends TestCase {
         Awl awl = AwlCache.getInstance().get(1);
 
         // 新建一个阿瓦隆游戏者，用户id为1,2,3,4,5
-        assertEquals(true, awl.add(new AwlUser(1)));
+//        assertEquals(true, awl.add(new AwlUser(1)));
         assertEquals(true, awl.add(new AwlUser(2)));
         assertEquals(true, awl.add(new AwlUser(3)));
         assertEquals(true, awl.add(new AwlUser(4)));

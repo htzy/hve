@@ -12,6 +12,7 @@ public class AssignAwlIdentityTest extends TestCase {
 
     public void setUp() throws Exception {
         super.setUp();
+        AwlCache.getInstance().remove(1);
         AwlCache.getInstance().create(1, "111");
     }
 
@@ -26,7 +27,7 @@ public class AssignAwlIdentityTest extends TestCase {
         assertEquals(true, awl.add(new AwlUser(5)));
 
         new AssignAwlIdentity().assign(awl);
-        for (GameUser gameUser : awl.getGamers()){
+        for (GameUser gameUser : awl.getGamers()) {
             System.out.println("gameUser.getNum() = " + gameUser.getNum());
             System.out.println("gameUser.getIdentity().getName() = " + gameUser.getIdentity().getName());
             System.out.println("gameUser.getInfo() = " + gameUser.getInfo());
