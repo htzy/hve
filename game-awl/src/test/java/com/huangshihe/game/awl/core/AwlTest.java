@@ -11,15 +11,16 @@ public class AwlTest extends TestCase {
     public void setUp() throws Exception {
         super.setUp();
         // 由用户（用户id：1，用户名：111）创建一个awl游戏。
+        AwlCache.getInstance().remove(1);
         AwlCache.getInstance().create(1, "111");
     }
 
     public void testInitCurrentTeamMembers() throws Exception {
         boolean flag = false;
-        flag&=true;
+        flag &= true;
         assertEquals(false, flag);
-        flag=true;
-        flag&=false;
+        flag = true;
+        flag &= false;
         assertEquals(false, flag);
     }
 
